@@ -1,7 +1,37 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart } from 'lucide-react';
-import { PlanFormData } from '../types';
+import { PlanFormData, DatePlan } from '../types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizePlan(raw: any): DatePlan {
+  return {
+    title: raw.plan_title ?? raw.title ?? '',
+    vibeSummary: raw.vibe_summary ?? raw.vibeSummary ?? '',
+    neighborhood: {
+      name: raw.neighborhood?.name ?? '',
+      whyThisNeighborhood: raw.neighborhood?.why ?? raw.neighborhood?.whyThisNeighborhood ?? '',
+    },
+    timeline: (raw.timeline ?? []).map((s: any) => ({
+      time: s.time ?? '',
+      venueName: s.venue_name ?? s.venueName ?? '',
+      venueType: s.venue_type ?? s.venueType ?? '',
+      address: s.address ?? '',
+      whyHere: s.why_here ?? s.whyHere ?? '',
+      mustOrder: s.must_order ?? s.mustOrder ?? '',
+      pricePerPerson: s.price_per_person ?? s.pricePerPerson ?? '',
+      bookingTip: s.booking_tip ?? s.bookingTip ?? '',
+    })),
+    backupOption: {
+      venueName: raw.backup_restaurant?.venue_name ?? raw.backupOption?.venueName ?? '',
+      venueType: raw.backup_restaurant?.type ?? raw.backupOption?.venueType ?? '',
+      address: raw.backup_restaurant?.address ?? raw.backupOption?.address ?? '',
+      whyItWorks: raw.backup_restaurant?.why ?? raw.backupOption?.whyItWorks ?? '',
+    },
+    dateTips: raw.date_tips ?? raw.dateTips ?? [],
+    totalCostEstimate: raw.total_estimate ?? raw.totalCostEstimate ?? '',
+  };
+}
 
 const VIBES = ['Romantic', 'Adventurous', 'Cozy', 'Upscale', 'Casual', 'Artsy', 'Foodie'];
 
@@ -79,7 +109,16 @@ export default function PlannerPage() {
       }
 
       const data = await res.json();
-      sessionStorage.setItem('dateos_result', JSON.stringify({ plan: data.plan, formData: form }));
+      console.log('[DateOS] Raw API response:', JSON.stringify(data, null, 2));
+
+      if (!data.plan) {
+        throw new Error(`API returned no plan. Raw response: ${JSON.stringify(data)}`);
+      }
+
+      const plan = normalizePlan(data.plan);
+      console.log('[DateOS] Normalized plan:', JSON.stringify(plan, null, 2));
+
+      sessionStorage.setItem('dateos_result', JSON.stringify({ plan, formData: form }));
       navigate('/result');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
@@ -120,7 +159,7 @@ export default function PlannerPage() {
               Plan your date
             </h1>
             <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-              Fill in the details and we'll craft your perfect evening.
+              Fill in the details and our AI will craft your perfect evening.
             </p>
           </div>
 
@@ -273,7 +312,7 @@ function LoadingOverlay() {
         Planning your perfect night...
       </h2>
       <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-        Crafting every detail with care
+        Our AI is crafting every detail with care
       </p>
       <div className="flex gap-1.5 mt-8">
         {[0, 1, 2].map(i => (

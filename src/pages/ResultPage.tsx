@@ -14,22 +14,47 @@ interface ResultData {
 export default function ResultPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<ResultData | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
   const [backupOpen, setBackupOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const raw = sessionStorage.getItem('dateos_result');
+    console.log('[DateOS] sessionStorage dateos_result:', raw);
     if (!raw) {
       navigate('/plan');
       return;
     }
     try {
-      setData(JSON.parse(raw));
-    } catch {
-      navigate('/plan');
+      const parsed = JSON.parse(raw);
+      console.log('[DateOS] Parsed result data:', parsed);
+      if (!parsed.plan) {
+        setParseError(`Stored data is missing 'plan' field. Raw: ${raw}`);
+        return;
+      }
+      setData(parsed);
+    } catch (e) {
+      console.error('[DateOS] Failed to parse sessionStorage:', e);
+      setParseError(`Failed to parse stored plan: ${e}. Raw: ${raw}`);
     }
   }, [navigate]);
+
+  if (parseError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: '#0c0c10' }}>
+        <div className="max-w-2xl w-full p-6 rounded-2xl" style={{ background: '#13131a', border: '1px solid rgba(232,85,106,0.3)' }}>
+          <h2 className="font-serif text-xl font-medium mb-3" style={{ color: '#e8556a' }}>Something went wrong rendering your plan</h2>
+          <pre className="text-xs overflow-auto p-4 rounded-xl mb-4 whitespace-pre-wrap" style={{ background: 'rgba(0,0,0,0.4)', color: 'rgba(240,237,232,0.6)', maxHeight: '300px' }}>
+            {parseError}
+          </pre>
+          <button onClick={() => navigate('/plan')} className="btn-rose flex items-center gap-2 text-sm" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!data) return null;
 
