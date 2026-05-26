@@ -312,7 +312,7 @@ function LoadingOverlay() {
         Planning your perfect night...
       </h2>
       <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-        Our AI is crafting every detail with care
+        We’re crafting every detail with care
       </p>
       <div className="flex gap-1.5 mt-8">
         {[0, 1, 2].map(i => (
