@@ -11,7 +11,7 @@ export default function Nav() {
           <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(232,85,106,0.15)', border: '1px solid rgba(232,85,106,0.3)' }}>
             <Heart size={15} className="text-rose fill-rose" style={{ color: '#e8556a' }} />
           </div>
-          <span className="font-serif text-xl font-medium tracking-wide" style={{ color: '#f0ede8' }}>DateOS</span>
+          <span className="font-serif text-xl font-medium tracking-wide"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
         </Link>
 
         <div className="flex items-center gap-1">

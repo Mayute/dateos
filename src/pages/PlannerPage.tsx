@@ -146,7 +146,7 @@ export default function PlannerPage() {
               Back
             </button>
             <div className="flex items-center gap-2">
-              <span className="font-serif text-xl font-medium" style={{ color: '#f0ede8' }}>DateOS</span>
+              <span className="font-serif text-xl font-medium"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
             </div>
             <div className="w-16" />
           </div>

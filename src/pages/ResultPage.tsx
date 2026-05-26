@@ -98,7 +98,7 @@ export default function ResultPage() {
             <ArrowLeft size={16} />
             Back
           </button>
-          <span className="font-serif text-xl font-medium" style={{ color: '#f0ede8' }}>DateOS</span>
+          <span className="font-serif text-xl font-medium"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
           <button
             onClick={handleShare}
             className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-full transition-all duration-200"

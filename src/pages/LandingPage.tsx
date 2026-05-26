@@ -65,7 +65,7 @@ export default function LandingPage() {
           <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'rgba(232,85,106,0.15)', border: '1px solid rgba(232,85,106,0.3)' }}>
             <span className="text-base" style={{ color: '#e8556a' }}>♥</span>
           </div>
-          <span className="font-serif text-2xl font-medium tracking-wide" style={{ color: '#f0ede8' }}>DateOS</span>
+          <span className="font-serif text-2xl font-medium tracking-wide"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
         </div>
         <button
           onClick={() => navigate('/saved')}
