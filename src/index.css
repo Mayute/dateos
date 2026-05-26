@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #0c0c10;
+    color: #f0ede8;
+  }
+
+  body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background-color: #0c0c10;
+    color: #f0ede8;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0c0c10;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(232, 85, 106, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(232, 85, 106, 0.5);
+  }
+}
+
+@layer components {
+  .btn-rose {
+    @apply bg-rose text-white font-semibold px-8 py-4 rounded-full
+           transition-all duration-300 hover:bg-rose-light hover:shadow-lg
+           active:scale-95 cursor-pointer;
+    box-shadow: 0 0 20px rgba(232, 85, 106, 0.25);
+  }
+
+  .btn-rose:hover {
+    box-shadow: 0 0 35px rgba(232, 85, 106, 0.45);
+  }
+
+  .card-dark {
+    @apply bg-bg-card border rounded-2xl;
+    border-color: rgba(240, 237, 232, 0.08);
+  }
+
+  .card-dark:hover {
+    border-color: rgba(240, 237, 232, 0.15);
+  }
+
+  .input-dark {
+    @apply w-full bg-bg-elevated border rounded-xl px-4 py-3
+           text-cream placeholder-cream-dim outline-none
+           transition-all duration-200 font-sans text-sm;
+    border-color: rgba(240, 237, 232, 0.08);
+  }
+
+  .input-dark:focus {
+    border-color: rgba(232, 85, 106, 0.5);
+    box-shadow: 0 0 0 3px rgba(232, 85, 106, 0.1);
+  }
+
+  .chip-vibe {
+    @apply px-4 py-2 rounded-full border text-sm font-medium cursor-pointer
+           transition-all duration-200 select-none;
+    border-color: rgba(240, 237, 232, 0.15);
+    color: rgba(240, 237, 232, 0.6);
+    background: transparent;
+  }
+
+  .chip-vibe:hover {
+    border-color: rgba(232, 85, 106, 0.4);
+    color: rgba(240, 237, 232, 0.9);
+  }
+
+  .chip-vibe.active {
+    background: rgba(232, 85, 106, 0.15);
+    border-color: rgba(232, 85, 106, 0.6);
+    color: #e8556a;
+  }
+
+  .label-field {
+    @apply block text-cream-muted text-xs font-medium mb-2 tracking-wider uppercase;
+  }
+
+  .section-heading {
+    @apply font-serif text-2xl font-medium text-cream;
+  }
+
+  .time-badge {
+    @apply text-xs font-semibold px-3 py-1 rounded-full;
+    background: rgba(232, 85, 106, 0.15);
+    color: #e8556a;
+    border: 1px solid rgba(232, 85, 106, 0.3);
+  }
+
+  .gold-highlight {
+    @apply font-medium;
+    color: #c9a84c;
+  }
+}
+
+/* Orb animation backgrounds */
+.orb {
+  border-radius: 50%;
+  filter: blur(80px);
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Fade in animation for page loads */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

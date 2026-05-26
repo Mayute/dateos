@@ -1,0 +1,18 @@
+import { Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import PlannerPage from './pages/PlannerPage';
+import ResultPage from './pages/ResultPage';
+import SavedPage from './pages/SavedPage';
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/plan" element={<PlannerPage />} />
+      <Route path="/result" element={<ResultPage />} />
+      <Route path="/saved" element={<SavedPage />} />
+    </Routes>
+  );
+}
+
+export default App;
