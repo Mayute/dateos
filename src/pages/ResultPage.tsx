@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, Heart, MapPin, Clock, ChevronDown, ChevronUp,
@@ -18,6 +18,7 @@ export default function ResultPage() {
   const [backupOpen, setBackupOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem('dateos_result');
@@ -75,12 +76,25 @@ export default function ResultPage() {
     setSaved(true);
   };
 
-  const handleShare = () => {
-    const text = buildShareText(plan, formData);
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: plan.title,
+          text: 'Check out this date night plan I found on DateOS 🌹',
+          url,
+        });
+      } catch {
+        // user cancelled or share failed — do nothing
+      }
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+        setCopied(true);
+        copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
+      });
+    }
   };
 
   return (
@@ -105,7 +119,7 @@ export default function ResultPage() {
             style={{ color: copied ? '#c9a84c' : 'rgba(240,237,232,0.5)', border: '1px solid rgba(240,237,232,0.1)' }}
           >
             {copied ? <Check size={14} /> : <Share2 size={14} />}
-            {copied ? 'Copied!' : 'Share'}
+            {copied ? 'Link copied!' : 'Share'}
           </button>
         </div>
       </div>
@@ -305,9 +319,4 @@ function TimelineCard({ stop, index }: { stop: import('../types').TimelineStop; 
       )}
     </div>
   );
-}
-
-function buildShareText(plan: DatePlan, formData: PlanFormData): string {
-  const stops = plan.timeline.map(s => `  ${s.time} — ${s.venueName} (${s.venueType})`).join('\n');
-  return `✨ ${plan.title}\n${plan.vibeSummary}\n\n📍 ${plan.neighborhood.name}, ${formData.city}\n💰 ${plan.totalCostEstimate} per person\n\n${plan.timeline.length > 0 ? `Timeline:\n${stops}` : ''}\n\nPlanned with DateOS`;
 }
