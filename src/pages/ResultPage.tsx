@@ -11,6 +11,23 @@ interface ResultData {
   formData: PlanFormData;
 }
 
+function MapsLink({ address }: { address: string }) {
+  if (!address) return null;
+  const href = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-1.5 transition-colors duration-150"
+      style={{ color: 'rgba(240,237,232,0.85)', textDecoration: 'underline', textDecorationColor: 'rgba(240,237,232,0.3)', textUnderlineOffset: '2px' }}
+    >
+      <MapPin size={11} style={{ flexShrink: 0 }} />
+      {address}
+    </a>
+  );
+}
+
 export default function ResultPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<ResultData | null>(null);
@@ -81,7 +98,7 @@ export default function ResultPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: plan.title,
+          title: 'DateOS — Date Night Planner',
           text: 'Check out this date night plan I found on DateOS 🌹',
           url,
         });
@@ -193,7 +210,9 @@ export default function ResultPage() {
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(240,237,232,0.4)' }}>{plan.backupOption.venueType}</p>
                 </div>
               </div>
-              <p className="text-xs mb-2" style={{ color: 'rgba(240,237,232,0.85)' }}>{plan.backupOption.address}</p>
+              <div className="text-xs mb-2">
+                <MapsLink address={plan.backupOption.address} />
+              </div>
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.6)' }}>{plan.backupOption.whyItWorks}</p>
             </div>
           )}
@@ -290,10 +309,9 @@ function TimelineCard({ stop, index }: { stop: import('../types').TimelineStop; 
 
       {open && (
         <div className="px-6 pb-6 animate-fade-in" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
-          <p className="text-xs pt-4 mb-3 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
-            <MapPin size={11} />
-            {stop.address}
-          </p>
+          <div className="text-xs pt-4 mb-3">
+            <MapsLink address={stop.address} />
+          </div>
 
           <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(240,237,232,0.6)' }}>
             <span className="font-medium" style={{ color: 'rgba(240,237,232,0.8)' }}>Why here: </span>
