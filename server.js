@@ -48,7 +48,7 @@ app.post('/api/plan', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
+        max_tokens: 4096,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }],
       }),
@@ -69,7 +69,6 @@ app.post('/api/plan', async (req, res) => {
 
     let plan;
     try {
-      // Strip markdown code fences if present
       const cleaned = rawContent.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
       plan = JSON.parse(cleaned);
     } catch {
