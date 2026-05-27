@@ -193,7 +193,7 @@ export default function ResultPage() {
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(240,237,232,0.4)' }}>{plan.backupOption.venueType}</p>
                 </div>
               </div>
-              <p className="text-xs mb-2" style={{ color: 'rgba(240,237,232,0.4)' }}>{plan.backupOption.address}</p>
+              <p className="text-xs mb-2" style={{ color: 'rgba(240,237,232,0.85)' }}>{plan.backupOption.address}</p>
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.6)' }}>{plan.backupOption.whyItWorks}</p>
             </div>
           )}
@@ -290,7 +290,7 @@ function TimelineCard({ stop, index }: { stop: import('../types').TimelineStop; 
 
       {open && (
         <div className="px-6 pb-6 animate-fade-in" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
-          <p className="text-xs pt-4 mb-3 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.35)' }}>
+          <p className="text-xs pt-4 mb-3 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
             <MapPin size={11} />
             {stop.address}
           </p>
