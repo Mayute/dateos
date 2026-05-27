@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart, Share2, Check, Star } from 'lucide-react';
 import { SavedPlan, DatePlan } from '../types';
 
 export default function SavedPage() {
@@ -92,31 +92,63 @@ function SavedCard({ plan, expanded, onToggle, onDelete }: {
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: plan.title,
+          text: 'Check out this date night plan I found on DateOS 🌹',
+          url,
+        });
+      } catch {
+        // user cancelled — do nothing
+      }
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+        setCopied(true);
+        copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
+
   return (
     <div className="rounded-2xl overflow-hidden transition-all duration-300"
       style={{ background: '#13131a', border: `1px solid ${expanded ? 'rgba(232,85,106,0.25)' : 'rgba(240,237,232,0.07)'}` }}>
       {/* Card header */}
       <div className="px-6 py-5 flex items-center gap-4">
         <button className="flex-1 text-left" onClick={onToggle}>
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h3 className="font-serif text-xl font-medium mb-1 truncate" style={{ color: '#f0ede8' }}>{plan.title}</h3>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="flex items-center gap-1 text-xs" style={{ color: 'rgba(240,237,232,0.4)' }}>
-                  <MapPin size={10} />
-                  {plan.city}
-                </span>
-                <span className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ background: 'rgba(232,85,106,0.1)', border: '1px solid rgba(232,85,106,0.2)', color: '#e8556a' }}>
-                  {plan.occasion}
-                </span>
-                <span className="text-xs" style={{ color: 'rgba(240,237,232,0.3)' }}>{plan.dateSaved}</span>
-              </div>
+          <div className="min-w-0">
+            <h3 className="font-serif text-xl font-medium mb-1 truncate" style={{ color: '#f0ede8' }}>{plan.title}</h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="flex items-center gap-1 text-xs" style={{ color: 'rgba(240,237,232,0.4)' }}>
+                <MapPin size={10} />
+                {plan.city}
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(232,85,106,0.1)', border: '1px solid rgba(232,85,106,0.2)', color: '#e8556a' }}>
+                {plan.occasion}
+              </span>
+              <span className="text-xs" style={{ color: 'rgba(240,237,232,0.3)' }}>{plan.dateSaved}</span>
             </div>
           </div>
         </button>
 
         <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={handleShare}
+            className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200"
+            style={{ color: copied ? '#c9a84c' : 'rgba(240,237,232,0.3)', background: 'transparent' }}
+            onMouseEnter={e => { if (!copied) { e.currentTarget.style.color = '#f0ede8'; e.currentTarget.style.background = 'rgba(240,237,232,0.06)'; }}}
+            onMouseLeave={e => { if (!copied) { e.currentTarget.style.color = 'rgba(240,237,232,0.3)'; e.currentTarget.style.background = 'transparent'; }}}
+          >
+            {copied ? <Check size={14} /> : <Share2 size={14} />}
+          </button>
           <button
             onClick={onDelete}
             className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200"
@@ -147,6 +179,8 @@ function SavedCard({ plan, expanded, onToggle, onDelete }: {
 }
 
 function ExpandedPlan({ plan }: { plan: DatePlan }) {
+  const [backupOpen, setBackupOpen] = useState(false);
+
   return (
     <div className="px-6 py-6 space-y-6">
       {/* Vibe summary */}
@@ -164,28 +198,91 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.5)' }}>{plan.neighborhood.whyThisNeighborhood}</p>
       </div>
 
-      {/* Timeline compact */}
+      {/* Timeline — full details */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Clock size={12} style={{ color: '#e8556a' }} />
           <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(240,237,232,0.35)' }}>Evening Timeline</span>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {plan.timeline.map((stop, i) => (
-            <div key={i} className="flex items-start gap-3 px-4 py-3 rounded-xl"
-              style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.05)' }}>
-              <span className="time-badge flex-shrink-0 text-xs">{stop.time}</span>
-              <div className="min-w-0">
-                <p className="font-medium text-sm" style={{ color: '#f0ede8' }}>{stop.venueName}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(240,237,232,0.4)' }}>{stop.venueType} · {stop.pricePerPerson}</p>
-                {stop.mustOrder && (
-                  <p className="text-xs mt-1 gold-highlight">Must order: {stop.mustOrder}</p>
-                )}
+            <div key={i} className="rounded-xl overflow-hidden"
+              style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
+              {/* Stop header */}
+              <div className="px-4 py-3 flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                  style={{ background: 'rgba(232,85,106,0.12)', border: '1px solid rgba(232,85,106,0.2)', color: '#e8556a' }}>
+                  {i + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="time-badge text-xs">{stop.time}</span>
+                    <p className="font-medium text-sm" style={{ color: '#f0ede8' }}>{stop.venueName}</p>
+                  </div>
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(240,237,232,0.4)' }}>{stop.venueType}</p>
+                </div>
+              </div>
+              {/* Stop details */}
+              <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
+                <p className="text-xs pt-3 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
+                  <MapPin size={10} />
+                  {stop.address}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.6)' }}>
+                  <span className="font-medium" style={{ color: 'rgba(240,237,232,0.8)' }}>Why here: </span>
+                  {stop.whyHere}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="px-3 py-2.5 rounded-lg"
+                    style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)' }}>
+                    <p className="text-xs mb-1" style={{ color: 'rgba(201,168,76,0.6)', fontWeight: 500 }}>Must order</p>
+                    <p className="text-xs gold-highlight">{stop.mustOrder}</p>
+                  </div>
+                  <div className="px-3 py-2.5 rounded-lg" style={{ background: 'rgba(240,237,232,0.04)', border: '1px solid rgba(240,237,232,0.07)' }}>
+                    <p className="text-xs mb-1" style={{ color: 'rgba(240,237,232,0.35)', fontWeight: 500 }}>Per person</p>
+                    <p className="text-xs" style={{ color: '#f0ede8' }}>{stop.pricePerPerson}</p>
+                  </div>
+                  <div className="px-3 py-2.5 rounded-lg" style={{ background: 'rgba(240,237,232,0.04)', border: '1px solid rgba(240,237,232,0.07)' }}>
+                    <p className="text-xs mb-1" style={{ color: 'rgba(240,237,232,0.35)', fontWeight: 500 }}>Booking tip</p>
+                    <p className="text-xs" style={{ color: '#f0ede8' }}>{stop.bookingTip}</p>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Backup option */}
+      {plan.backupOption?.venueName && (
+        <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
+          <button
+            className="w-full px-4 py-3 flex items-center justify-between"
+            onClick={() => setBackupOpen(p => !p)}
+          >
+            <div className="flex items-center gap-2">
+              <Star size={13} style={{ color: '#c9a84c' }} />
+              <span className="font-medium text-sm" style={{ color: '#f0ede8' }}>Backup Option</span>
+            </div>
+            {backupOpen ? <ChevronUp size={15} style={{ color: 'rgba(240,237,232,0.4)' }} /> : <ChevronDown size={15} style={{ color: 'rgba(240,237,232,0.4)' }} />}
+          </button>
+          {backupOpen && (
+            <div className="px-4 pb-4 animate-fade-in" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
+              <p className="font-serif text-base font-medium mt-3 mb-0.5" style={{ color: '#f0ede8' }}>{plan.backupOption.venueName}</p>
+              {plan.backupOption.venueType && (
+                <p className="text-xs mb-1" style={{ color: 'rgba(240,237,232,0.4)' }}>{plan.backupOption.venueType}</p>
+              )}
+              {plan.backupOption.address && (
+                <p className="text-xs mb-2 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
+                  <MapPin size={10} />
+                  {plan.backupOption.address}
+                </p>
+              )}
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.6)' }}>{plan.backupOption.whyItWorks}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Date tips */}
       {plan.dateTips && plan.dateTips.length > 0 && (
@@ -196,7 +293,10 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
           </div>
           <div className="space-y-2">
             {plan.dateTips.map((tip, i) => (
-              <p key={i} className="text-sm leading-relaxed pl-2" style={{ color: 'rgba(240,237,232,0.55)', borderLeft: '2px solid rgba(232,85,106,0.3)', paddingLeft: '12px' }}>{tip}</p>
+              <p key={i} className="text-sm leading-relaxed"
+                style={{ color: 'rgba(240,237,232,0.55)', borderLeft: '2px solid rgba(232,85,106,0.3)', paddingLeft: '12px' }}>
+                {tip}
+              </p>
             ))}
           </div>
         </div>
