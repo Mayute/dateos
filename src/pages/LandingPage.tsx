@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin, Wallet, Sparkles } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import Footer from '../components/Footer';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ export default function LandingPage() {
       </main>
 
       {/* Bottom section */}
-      <section className="relative z-10 px-6 pb-20">
+      <section className="relative z-10 px-6 pb-12">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
@@ -152,12 +153,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 text-center pb-8">
-        <p className="text-xs" style={{ color: 'rgba(240,237,232,0.25)', fontFamily: 'Outfit, sans-serif' }}>
-          DateOS · date night concierge
-        </p>
-      </footer>
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 }

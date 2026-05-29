@@ -3,6 +3,9 @@ import LandingPage from './pages/LandingPage';
 import PlannerPage from './pages/PlannerPage';
 import ResultPage from './pages/ResultPage';
 import SavedPage from './pages/SavedPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import DisclaimerPage from './pages/DisclaimerPage';
 
 function App() {
   return (
@@ -11,6 +14,9 @@ function App() {
       <Route path="/plan" element={<PlannerPage />} />
       <Route path="/result" element={<ResultPage />} />
       <Route path="/saved" element={<SavedPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/disclaimer" element={<DisclaimerPage />} />
     </Routes>
   );
 }

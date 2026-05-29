@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart } from 'lucide-react';
 import { PlanFormData, DatePlan } from '../types';
+import Footer from '../components/Footer';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizePlan(raw: any): DatePlan {
@@ -131,7 +132,7 @@ export default function PlannerPage() {
     <>
       {loading && <LoadingOverlay />}
 
-      <div className="min-h-screen" style={{ background: '#0c0c10' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
         {/* Top bar */}
         <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
           <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -152,7 +153,7 @@ export default function PlannerPage() {
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto px-6 py-12">
+        <div className="flex-1 max-w-2xl mx-auto px-6 py-12 w-full">
           {/* Header */}
           <div className="mb-10">
             <h1 className="font-serif text-4xl md:text-5xl font-medium mb-3" style={{ color: '#f0ede8' }}>
@@ -290,6 +291,8 @@ export default function PlannerPage() {
             </button>
           </form>
         </div>
+
+        <Footer />
       </div>
     </>
   );
@@ -312,7 +315,7 @@ function LoadingOverlay() {
         Planning your perfect night...
       </h2>
       <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-        We’re crafting every detail with care
+        We're crafting every detail with care
       </p>
       <div className="flex gap-1.5 mt-8">
         {[0, 1, 2].map(i => (

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart, Share2, Check, Star } from 'lucide-react';
 import { SavedPlan, DatePlan } from '../types';
+import Footer from '../components/Footer';
 
 export default function SavedPage() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function SavedPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#0c0c10' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
       {/* Top bar */}
       <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -53,7 +54,7 @@ export default function SavedPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="flex-1 max-w-4xl mx-auto px-6 py-12 w-full">
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-3">
             <BookHeart size={20} style={{ color: '#e8556a' }} />
@@ -82,6 +83,8 @@ export default function SavedPage() {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 }
@@ -101,7 +104,7 @@ function SavedCard({ plan, expanded, onToggle, onDelete }: {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: plan.title,
+          title: 'DateOS — Date Night Planner',
           text: 'Check out this date night plan I found on DateOS 🌹',
           url,
         });
@@ -208,7 +211,6 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
           {plan.timeline.map((stop, i) => (
             <div key={i} className="rounded-xl overflow-hidden"
               style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
-              {/* Stop header */}
               <div className="px-4 py-3 flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
                   style={{ background: 'rgba(232,85,106,0.12)', border: '1px solid rgba(232,85,106,0.2)', color: '#e8556a' }}>
@@ -222,7 +224,6 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(240,237,232,0.4)' }}>{stop.venueType}</p>
                 </div>
               </div>
-              {/* Stop details */}
               <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
                 <p className="text-xs pt-3 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
                   <MapPin size={10} />

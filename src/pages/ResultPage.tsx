@@ -5,6 +5,7 @@ import {
   Share2, BookmarkPlus, Check, Star
 } from 'lucide-react';
 import { DatePlan, PlanFormData, SavedPlan } from '../types';
+import Footer from '../components/Footer';
 
 interface ResultData {
   plan: DatePlan;
@@ -115,7 +116,7 @@ export default function ResultPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#0c0c10' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
       {/* Top bar */}
       <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -141,7 +142,7 @@ export default function ResultPage() {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-12 space-y-6 animate-fade-in">
+      <div className="flex-1 max-w-3xl mx-auto px-6 py-12 space-y-6 animate-fade-in w-full">
 
         {/* Hero header */}
         <div className="text-center mb-10">
@@ -246,7 +247,7 @@ export default function ResultPage() {
         </div>
 
         {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-12">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             onClick={handleSave}
             disabled={saved}
@@ -270,7 +271,15 @@ export default function ResultPage() {
             <ArrowRight size={16} />
           </button>
         </div>
+
+        {/* Disclaimer */}
+        <p className="text-xs leading-relaxed text-center pb-6"
+          style={{ color: 'rgba(240,237,232,0.25)', fontFamily: 'Outfit, sans-serif', maxWidth: '520px', margin: '0 auto' }}>
+          DateOS recommendations are AI-generated suggestions for inspiration purposes only. Please confirm venue availability, hours, and reservations directly before your date. DateOS is not responsible for changes in restaurant operations, closures, or event availability.
+        </p>
       </div>
+
+      <Footer />
     </div>
   );
 }
