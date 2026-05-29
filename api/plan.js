@@ -14,7 +14,7 @@ RULES:
 RESPONSE FORMAT:
 {"plan_title":"","vibe_summary":"","neighborhood":{"name":"","why":""},"timeline":[{"time":"","type":"","venue_name":"","venue_type":"","address":"","why_here":"","must_order":"","price_per_person":"","booking_tip":""}],"backup_restaurant":{"venue_name":"","why":"","address":""},"date_tips":["","",""],"total_estimate":"","perfect_for":""}`;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -85,4 +85,4 @@ export default async function handler(req, res) {
     console.error('Server error:', err);
     return res.status(500).json({ error: 'Internal server error. Please try again.' });
   }
-}
+};
