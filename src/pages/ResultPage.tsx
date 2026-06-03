@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, Heart, MapPin, Clock, ChevronDown, ChevronUp,
-  Share2, BookmarkPlus, Check, Star, Shirt
+  Share2, BookmarkPlus, Check, Star, Shirt, Link
 } from 'lucide-react';
 import { DatePlan, PlanFormData, SavedPlan } from '../types';
 import Footer from '../components/Footer';
@@ -45,6 +45,8 @@ function DressCodeText({ text }: { text: string }) {
     </>
   );
 }
+
+const isDesktop = () => typeof navigator !== 'undefined' && navigator.maxTouchPoints === 0;
 
 export default function ResultPage() {
   const navigate = useNavigate();
@@ -111,26 +113,32 @@ export default function ResultPage() {
     setSaved(true);
   };
 
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      setCopied(true);
+      copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   const handleShare = async () => {
-    const url = window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'DateOS — Date Night Planner',
           text: 'Check out this date night plan I found on DateOS 🌹',
-          url,
+          url: window.location.href,
         });
       } catch {
         // user cancelled or share failed — do nothing
       }
     } else {
-      navigator.clipboard.writeText(url).then(() => {
-        if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
-        setCopied(true);
-        copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
-      });
+      copyLink();
     }
   };
+
+  const showShareButton = !!navigator.share;
+  const showCopyButton = !navigator.share || isDesktop();
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
@@ -148,14 +156,35 @@ export default function ResultPage() {
             Back
           </button>
           <span className="font-serif text-xl font-medium"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-full transition-all duration-200"
-            style={{ color: copied ? '#c9a84c' : 'rgba(240,237,232,0.5)', border: '1px solid rgba(240,237,232,0.1)' }}
-          >
-            {copied ? <Check size={14} /> : <Share2 size={14} />}
-            {copied ? 'Link copied!' : 'Share'}
-          </button>
+          <div className="flex items-center gap-2">
+            {showShareButton && (
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-full transition-all duration-200"
+                style={{ color: 'rgba(240,237,232,0.5)', border: '1px solid rgba(240,237,232,0.1)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#f0ede8')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,237,232,0.5)')}
+              >
+                <Share2 size={14} />
+                Share
+              </button>
+            )}
+            {showCopyButton && (
+              <button
+                onClick={copyLink}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-full transition-all duration-200"
+                style={{
+                  color: copied ? '#c9a84c' : 'rgba(240,237,232,0.5)',
+                  border: `1px solid ${copied ? 'rgba(201,168,76,0.3)' : 'rgba(240,237,232,0.1)'}`,
+                }}
+                onMouseEnter={e => { if (!copied) e.currentTarget.style.color = '#f0ede8'; }}
+                onMouseLeave={e => { if (!copied) e.currentTarget.style.color = 'rgba(240,237,232,0.5)'; }}
+              >
+                {copied ? <Check size={14} /> : <Link size={14} />}
+                {copied ? 'Copied!' : 'Copy Link'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
