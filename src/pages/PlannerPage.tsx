@@ -31,6 +31,7 @@ function normalizePlan(raw: any): DatePlan {
     },
     dateTips: raw.date_tips ?? raw.dateTips ?? [],
     totalCostEstimate: raw.total_estimate ?? raw.totalCostEstimate ?? '',
+    dressCode: raw.dress_code ?? raw.dressCode ?? '',
   };
 }
 
