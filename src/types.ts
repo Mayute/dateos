@@ -35,6 +35,7 @@ export interface DatePlan {
   };
   dateTips: string[];
   totalCostEstimate: string;
+  dressCode?: string;
 }
 
 export interface SavedPlan {

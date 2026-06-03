@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, Heart, MapPin, Clock, ChevronDown, ChevronUp,
-  Share2, BookmarkPlus, Check, Star
+  Share2, BookmarkPlus, Check, Star, Shirt
 } from 'lucide-react';
 import { DatePlan, PlanFormData, SavedPlan } from '../types';
 import Footer from '../components/Footer';
@@ -237,6 +237,23 @@ export default function ResultPage() {
             ))}
           </div>
         </SectionCard>
+
+        {/* What to Wear */}
+        {plan.dressCode && (
+          <SectionCard>
+            <div className="flex items-center gap-2 mb-4">
+              <Shirt size={13} style={{ color: '#e8556a' }} />
+              <span className="text-xs font-medium tracking-widest uppercase" style={{ color: 'rgba(240,237,232,0.4)' }}>What to Wear</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                style={{ background: 'rgba(232,85,106,0.12)', border: '1px solid rgba(232,85,106,0.2)' }}>
+                <Shirt size={9} style={{ color: '#e8556a' }} />
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>{plan.dressCode}</p>
+            </div>
+          </SectionCard>
+        )}
 
         {/* Total cost */}
         <div className="px-6 py-5 rounded-2xl text-center"
