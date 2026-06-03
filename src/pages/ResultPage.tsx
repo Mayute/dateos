@@ -29,6 +29,23 @@ function MapsLink({ address }: { address: string }) {
   );
 }
 
+function DressCodeText({ text }: { text: string }) {
+  const MARKER = 'sets the dress standard';
+  const markerIndex = text.indexOf(MARKER);
+  if (markerIndex === -1) {
+    return <>{text}</>;
+  }
+  const venueName = text.slice(0, markerIndex).trim();
+  const rest = text.slice(markerIndex);
+  return (
+    <>
+      <span style={{ color: '#e8556a', fontWeight: 700 }}>{venueName}</span>
+      {' '}
+      {rest}
+    </>
+  );
+}
+
 export default function ResultPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<ResultData | null>(null);
@@ -250,7 +267,9 @@ export default function ResultPage() {
                 style={{ background: 'rgba(232,85,106,0.12)', border: '1px solid rgba(232,85,106,0.2)' }}>
                 <Shirt size={9} style={{ color: '#e8556a' }} />
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>{plan.dressCode}</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>
+                <DressCodeText text={plan.dressCode} />
+              </p>
             </div>
           </SectionCard>
         )}
