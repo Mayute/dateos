@@ -10,6 +10,7 @@ export function isPaid(): boolean {
 export function markPaid(): void {
   localStorage.setItem(PAID_KEY, 'true');
   localStorage.removeItem(COUNT_KEY);
+  localStorage.removeItem(RESET_KEY);
 }
 
 function currentMonthKey() {
@@ -18,13 +19,24 @@ function currentMonthKey() {
 }
 
 function getCount(): number {
+  const monthKey = currentMonthKey();
   const stored = localStorage.getItem(RESET_KEY);
-  if (stored !== currentMonthKey()) {
-    localStorage.setItem(RESET_KEY, currentMonthKey());
+  if (stored !== monthKey) {
+    localStorage.setItem(RESET_KEY, monthKey);
     localStorage.setItem(COUNT_KEY, '0');
     return 0;
   }
-  return parseInt(localStorage.getItem(COUNT_KEY) ?? '0', 10);
+  const raw = localStorage.getItem(COUNT_KEY);
+  if (raw === null) {
+    localStorage.setItem(COUNT_KEY, '0');
+    return 0;
+  }
+  const count = parseInt(raw, 10);
+  if (isNaN(count) || count < 0) {
+    localStorage.setItem(COUNT_KEY, '0');
+    return 0;
+  }
+  return count;
 }
 
 export function isAtLimit(): boolean {
