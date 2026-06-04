@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart } from 'lucide-react';
 import { PlanFormData, DatePlan } from '../types';
-import Logo from '../components/Logo';
+import Logo from '../components/logo';
 import PaywallModal from '../components/PaywallModal';
 import { isAtLimit, incrementPlanCount } from '../hooks/usePlanGate';
 
