@@ -1,6 +1,16 @@
 const COUNT_KEY = 'dateos_plan_count';
 const RESET_KEY = 'dateos_reset_date';
+const PAID_KEY = 'dateos_paid';
 const FREE_LIMIT = 2;
+
+export function isPaid(): boolean {
+  return localStorage.getItem(PAID_KEY) === 'true';
+}
+
+export function markPaid(): void {
+  localStorage.setItem(PAID_KEY, 'true');
+  localStorage.removeItem(COUNT_KEY);
+}
 
 function currentMonthKey() {
   const d = new Date();
@@ -18,6 +28,7 @@ function getCount(): number {
 }
 
 export function isAtLimit(): boolean {
+  if (isPaid()) return false;
   return getCount() >= FREE_LIMIT;
 }
 

@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import PlannerPage from './pages/PlannerPage';
 import ResultPage from './pages/ResultPage';
@@ -6,8 +7,19 @@ import SavedPage from './pages/SavedPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import DisclaimerPage from './pages/DisclaimerPage';
+import { markPaid } from './hooks/usePlanGate';
 
 function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('paid') === 'true') {
+      markPaid();
+      navigate('/', { replace: true });
+    }
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />

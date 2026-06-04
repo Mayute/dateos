@@ -1,8 +1,8 @@
 import { X, Zap, Star, Crown } from 'lucide-react';
 
-const SINGLE_PLAN_URL = 'https://buy.stripe.com/cNidR2cd48tO8df6ZD9ws02';
-const PRO_MONTHLY_URL = 'https://buy.stripe.com/9B600cgtk11m0KN1Fj9ws01';
-const PRO_ANNUAL_URL = 'https://buy.stripe.com/9B6bIU6SK4dy657do19ws00';
+const SINGLE_PLAN_URL = 'https://buy.stripe.com/cNidR2cd48tO8df6ZD9ws02?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue';
+const PRO_MONTHLY_URL = 'https://buy.stripe.com/9B600cgtk11m0KN1Fj9ws01?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue';
+const PRO_ANNUAL_URL = 'https://buy.stripe.com/9B6bIU6SK4dy657do19ws00?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue';
 
 interface Props {
   onClose: () => void;
@@ -39,7 +39,7 @@ export default function PaywallModal({ onClose }: Props) {
             <Crown size={24} style={{ color: '#e8556a' }} />
           </div>
           <h2 className="font-serif text-2xl font-medium mb-2" style={{ color: '#f0ede8' }}>
-            You've used your 2 free plans this month
+            You’ve used your 2 free plans this month
           </h2>
           <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
             Upgrade to keep planning unforgettable dates.
