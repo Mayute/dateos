@@ -1,8 +1,8 @@
 import { X, Zap, Star, Crown } from 'lucide-react';
 
-const SINGLE_PLAN_URL = '#single';
-const PRO_MONTHLY_URL = '#monthly';
-const PRO_ANNUAL_URL = '#annual';
+const SINGLE_PLAN_URL = 'https://buy.stripe.com/9B6bIU6SK4dy657do19ws00';
+const PRO_MONTHLY_URL = 'https://buy.stripe.com/9B600cgtk11m0KN1Fj9ws01';
+const PRO_ANNUAL_URL = 'https://buy.stripe.com/cNidR2cd48tO8df6ZD9ws02';
 
 interface Props {
   onClose: () => void;
