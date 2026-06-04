@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart } from 'lucide-react';
 import { PlanFormData, DatePlan } from '../types';
-import Footer from '../components/Footer';
+import Logo from '../components/Logo';
+import PaywallModal from '../components/PaywallModal';
+import { isAtLimit, incrementPlanCount } from '../hooks/usePlanGate';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizePlan(raw: any): DatePlan {
@@ -31,7 +33,6 @@ function normalizePlan(raw: any): DatePlan {
     },
     dateTips: raw.date_tips ?? raw.dateTips ?? [],
     totalCostEstimate: raw.total_estimate ?? raw.totalCostEstimate ?? '',
-    dressCode: raw.dress_code ?? raw.dressCode ?? '',
   };
 }
 
@@ -63,6 +64,7 @@ export default function PlannerPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const [form, setForm] = useState<PlanFormData>({
     city: '',
@@ -85,7 +87,12 @@ export default function PlannerPage() {
   };
 
   const buildUserPrompt = (f: PlanFormData) => {
-    return `Plan a date night with these details:\n- City: ${f.city}\n- Occasion: ${f.occasion}\n- Vibe: ${f.vibes.join(', ')}\n- Budget per person: ${f.budget}\n- When: ${f.dayTime}${f.dietary ? `\n- Dietary needs: ${f.dietary}` : ''}${f.avoid ? `\n- Avoid: ${f.avoid}` : ''}`;
+    return `Plan a date night with these details:
+- City: ${f.city}
+- Occasion: ${f.occasion}
+- Vibe: ${f.vibes.join(', ')}
+- Budget per person: ${f.budget}
+- When: ${f.dayTime}${f.dietary ? `\n- Dietary needs: ${f.dietary}` : ''}${f.avoid ? `\n- Avoid: ${f.avoid}` : ''}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,6 +102,12 @@ export default function PlannerPage() {
       return;
     }
     setError('');
+
+    if (isAtLimit()) {
+      setShowPaywall(true);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -120,6 +133,7 @@ export default function PlannerPage() {
       const plan = normalizePlan(data.plan);
       console.log('[DateOS] Normalized plan:', JSON.stringify(plan, null, 2));
 
+      incrementPlanCount();
       sessionStorage.setItem('dateos_result', JSON.stringify({ plan, formData: form }));
       navigate('/result');
     } catch (err: unknown) {
@@ -131,9 +145,10 @@ export default function PlannerPage() {
 
   return (
     <>
+      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
       {loading && <LoadingOverlay />}
 
-      <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
+      <div className="min-h-screen" style={{ background: '#0c0c10' }}>
         {/* Top bar */}
         <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
           <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -148,13 +163,13 @@ export default function PlannerPage() {
               Back
             </button>
             <div className="flex items-center gap-2">
-              <span className="font-serif text-xl font-medium"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
+              <Logo />
             </div>
             <div className="w-16" />
           </div>
         </div>
 
-        <div className="flex-1 max-w-2xl mx-auto px-6 py-12 w-full">
+        <div className="max-w-2xl mx-auto px-6 py-12">
           {/* Header */}
           <div className="mb-10">
             <h1 className="font-serif text-4xl md:text-5xl font-medium mb-3" style={{ color: '#f0ede8' }}>
@@ -292,8 +307,6 @@ export default function PlannerPage() {
             </button>
           </form>
         </div>
-
-        <Footer />
       </div>
     </>
   );
