@@ -1,8 +1,8 @@
 import { X, Zap, Star, Crown } from 'lucide-react';
 
-const SINGLE_PLAN_URL = 'https://buy.stripe.com/cNidR2cd48tO8df6ZD9ws02?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue';
-const PRO_MONTHLY_URL = 'https://buy.stripe.com/9B600cgtk11m0KN1Fj9ws01?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue';
-const PRO_ANNUAL_URL = 'https://buy.stripe.com/9B6bIU6SK4dy657do19ws00?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue';
+const SINGLE_PLAN_URL = 'https://buy.stripe.com/cNidR2cd48tO8df6ZD9ws02?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dsingle';
+const PRO_MONTHLY_URL = 'https://buy.stripe.com/9B600cgtk11m0KN1Fj9ws01?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dmonthly';
+const PRO_ANNUAL_URL = 'https://buy.stripe.com/9B6bIU6SK4dy657do19ws00?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dannual';
 
 interface Props {
   onClose: () => void;

@@ -7,7 +7,7 @@ import SavedPage from './pages/SavedPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import DisclaimerPage from './pages/DisclaimerPage';
-import { markPaid } from './hooks/usePlanGate';
+import { markPaid, markSinglePlan } from './hooks/usePlanGate';
 
 function App() {
   const navigate = useNavigate();
@@ -15,7 +15,11 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('paid') === 'true') {
-      markPaid();
+      if (params.get('plan') === 'single') {
+        markSinglePlan();
+      } else {
+        markPaid();
+      }
       navigate('/', { replace: true });
     }
   }, []);

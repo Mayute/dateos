@@ -13,6 +13,11 @@ export function markPaid(): void {
   localStorage.removeItem(RESET_KEY);
 }
 
+export function markSinglePlan(): void {
+  const current = getCount();
+  localStorage.setItem(COUNT_KEY, String(Math.max(0, current - 1)));
+}
+
 function currentMonthKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}`;
