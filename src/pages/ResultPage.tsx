@@ -29,6 +29,35 @@ function MapsLink({ address }: { address: string }) {
   );
 }
 
+function DressCodeText({ text, fallbackVenueName }: { text: string; fallbackVenueName?: string }) {
+  const MARKER = 'sets the dress standard';
+  const markerIndex = text.indexOf(MARKER);
+  if (markerIndex !== -1) {
+    const venueName = text.slice(0, markerIndex).trim();
+    const rest = text.slice(markerIndex);
+    return (
+      <>
+        <span style={{ color: '#fb7185', fontWeight: 700 }}>{venueName}</span>
+        {' '}
+        {rest}
+      </>
+    );
+  }
+  if (fallbackVenueName) {
+    const idx = text.indexOf(fallbackVenueName);
+    if (idx !== -1) {
+      return (
+        <>
+          {text.slice(0, idx)}
+          <span style={{ color: '#fb7185', fontWeight: 700 }}>{fallbackVenueName}</span>
+          {text.slice(idx + fallbackVenueName.length)}
+        </>
+      );
+    }
+  }
+  return <>{text}</>;
+}
+
 const isDesktop = () => typeof navigator !== 'undefined' && navigator.maxTouchPoints === 0;
 
 export default function ResultPage() {
@@ -280,7 +309,7 @@ export default function ResultPage() {
                 <Shirt size={9} style={{ color: '#e8556a' }} />
               </div>
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>
-                {plan.dressCode}
+                <DressCodeText text={plan.dressCode} fallbackVenueName={plan.timeline[0]?.venueName} />
               </p>
             </div>
           </SectionCard>
