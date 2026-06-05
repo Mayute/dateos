@@ -29,29 +29,17 @@ function MapsLink({ address }: { address: string }) {
   );
 }
 
-function DressCodeText({ text, venueName }: { text: string; venueName?: string }) {
-  if (venueName) {
-    const idx = text.indexOf(venueName);
-    if (idx !== -1) {
-      return (
-        <>
-          {text.slice(0, idx)}
-          <span style={{ color: '#e8556a', fontWeight: 700 }}>{venueName}</span>
-          {text.slice(idx + venueName.length)}
-        </>
-      );
-    }
-  }
-  const MARKER = 'sets the dress standard';
+function DressCodeText({ text }: { text: string }) {
+  const MARKER = 'sets the tone';
   const markerIndex = text.indexOf(MARKER);
   if (markerIndex === -1) {
     return <>{text}</>;
   }
-  const name = text.slice(0, markerIndex).trim();
+  const venueName = text.slice(0, markerIndex).trim().replace(/\s*—\s*$/, '').trim();
   const rest = text.slice(markerIndex);
   return (
     <>
-      <span style={{ color: '#e8556a', fontWeight: 700 }}>{name}</span>
+      <span style={{ color: '#e8556a', fontWeight: 700 }}>{venueName}</span>
       {' '}
       {rest}
     </>
@@ -309,7 +297,7 @@ export default function ResultPage() {
                 <Shirt size={9} style={{ color: '#e8556a' }} />
               </div>
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>
-                <DressCodeText text={plan.dressCode} venueName={plan.timeline[0]?.venueName} />
+                <DressCodeText text={plan.dressCode} />
               </p>
             </div>
           </SectionCard>
