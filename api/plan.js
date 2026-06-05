@@ -11,7 +11,7 @@ RULES:
 - If you are not confident a specific venue exists and is currently operating, do not include it. Accuracy matters more than completeness.
 - Format your response using the exact JSON structure below
 - Return ONLY valid JSON. No markdown. No backticks. No extra text before or after.
-- Always start the dress_code field with the most formal venue name first, then give the attire suggestion. Format: '[Venue Name] sets the dress standard for the evening — Him: [what he wears]. Her: [what she wears].' Always include Him and Her separately.
+- Always start the dress_code field with the most formal venue name first. Format: '[Venue Name] sets the dress standard for the evening — Him: [what he wears]. Her: [what she wears].'
 RESPONSE FORMAT:
 {"plan_title":"","vibe_summary":"","neighborhood":{"name":"","why":""},"timeline":[{"time":"","type":"","venue_name":"","venue_type":"","address":"","why_here":"","must_order":"","price_per_person":"","booking_tip":""}],"backup_restaurant":{"venue_name":"","type":"","why":"","address":""},"date_tips":["","",""],"total_estimate":"","dress_code":"","perfect_for":""}`;
 
