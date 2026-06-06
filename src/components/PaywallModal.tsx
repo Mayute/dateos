@@ -1,8 +1,8 @@
 import { X, Zap, Star, Crown } from 'lucide-react';
 
-const SINGLE_PLAN_URL = 'https://buy.stripe.com/cNidR2cd48tO8df6ZD9ws02?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dsingle';
-const PRO_MONTHLY_URL = 'https://buy.stripe.com/9B600cgtk11m0KN1Fj9ws01?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dmonthly';
-const PRO_ANNUAL_URL = 'https://buy.stripe.com/9B6bIU6SK4dy657do19ws00?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dannual';
+const SINGLE_PLAN_URL = 'https://buy.stripe.com/28EbIU1yq4dyfFH0Bf9ws03?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dsingle';
+const PRO_MONTHLY_URL = 'https://buy.stripe.com/aFa6oA6SKfWg657es59ws04?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dmonthly';
+const PRO_ANNUAL_URL = 'https://buy.stripe.com/3cI14g5OGfWg1ORbfT9ws05?success_url=https%3A%2F%2Fdateos.io%3Fpaid%3Dtrue%26plan%3Dannual';
 
 interface Props {
   onClose: () => void;
@@ -39,7 +39,7 @@ export default function PaywallModal({ onClose }: Props) {
             <Crown size={24} style={{ color: '#e8556a' }} />
           </div>
           <h2 className="font-serif text-2xl font-medium mb-2" style={{ color: '#f0ede8' }}>
-            You’ve used your 2 free plans this month
+            You've used your 2 free plans this month
           </h2>
           <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
             Upgrade to keep planning unforgettable dates.
@@ -66,7 +66,7 @@ export default function PaywallModal({ onClose }: Props) {
                 <p className="text-xs" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: 'Outfit, sans-serif' }}>One perfect date, no commitment</p>
               </div>
             </div>
-            <span className="text-sm font-semibold" style={{ color: '#f0ede8', fontFamily: 'Outfit, sans-serif' }}>$2.99</span>
+            <span className="text-sm font-semibold" style={{ color: '#f0ede8', fontFamily: 'Outfit, sans-serif' }}>$4.99</span>
           </a>
 
           {/* Pro Monthly */}
@@ -87,7 +87,7 @@ export default function PaywallModal({ onClose }: Props) {
                 <p className="text-xs" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: 'Outfit, sans-serif' }}>Unlimited plans every month</p>
               </div>
             </div>
-            <span className="text-sm font-semibold" style={{ color: '#e8556a', fontFamily: 'Outfit, sans-serif' }}>$12.99<span className="text-xs font-normal" style={{ color: 'rgba(232,85,106,0.7)' }}>/mo</span></span>
+            <span className="text-sm font-semibold" style={{ color: '#e8556a', fontFamily: 'Outfit, sans-serif' }}>$19.99<span className="text-xs font-normal" style={{ color: 'rgba(232,85,106,0.7)' }}>/mo</span></span>
           </a>
 
           {/* Pro Annual — Best Value */}
@@ -112,10 +112,10 @@ export default function PaywallModal({ onClose }: Props) {
               </div>
               <div>
                 <p className="text-sm font-medium" style={{ color: '#f0ede8', fontFamily: 'Outfit, sans-serif' }}>Pro Annual</p>
-                <p className="text-xs" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: 'Outfit, sans-serif' }}>Unlimited plans — save 36%</p>
+                <p className="text-xs" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: 'Outfit, sans-serif' }}>Unlimited plans — save 25%</p>
               </div>
             </div>
-            <span className="text-sm font-semibold" style={{ color: '#c9a84c', fontFamily: 'Outfit, sans-serif' }}>$99<span className="text-xs font-normal" style={{ color: 'rgba(201,168,76,0.7)' }}>/yr</span></span>
+            <span className="text-sm font-semibold" style={{ color: '#c9a84c', fontFamily: 'Outfit, sans-serif' }}>$179<span className="text-xs font-normal" style={{ color: 'rgba(201,168,76,0.7)' }}>/yr</span></span>
           </a>
         </div>
 
