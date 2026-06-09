@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart } from 'lucide-react';
 import { PlanFormData, DatePlan } from '../types';
 import Logo from '../components/logo';
 import PaywallModal from '../components/PaywallModal';
-import { isAtLimit, incrementPlanCount } from '../hooks/usePlanGate';
+import EmailGate from '../components/EmailGate';
+import {
+  getStoredEmail,
+  getUserByEmail,
+  incrementPlanCount,
+  canGeneratePlan,
+  type UserRecord
+} from '../lib/userStore';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizePlan(raw: any): DatePlan {
@@ -66,6 +73,9 @@ export default function PlannerPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(getStoredEmail());
+  const [userRecord, setUserRecord] = useState<UserRecord | null>(null);
+  const [showEmailGate, setShowEmailGate] = useState(!getStoredEmail());
 
   const [form, setForm] = useState<PlanFormData>({
     city: '',
@@ -76,6 +86,22 @@ export default function PlannerPage() {
     dietary: '',
     avoid: '',
   });
+
+  useEffect(() => {
+    if (userEmail) {
+      getUserByEmail(userEmail).then(u => {
+        if (u) setUserRecord(u);
+      });
+    }
+  }, [userEmail]);
+
+  function handleEmailAuthenticated(email: string) {
+    setUserEmail(email);
+    setShowEmailGate(false);
+    getUserByEmail(email).then(u => {
+      if (u) setUserRecord(u);
+    });
+  }
 
   const toggleVibe = (vibe: string) => {
     setForm(prev => {
@@ -104,7 +130,13 @@ export default function PlannerPage() {
     }
     setError('');
 
-    if (isAtLimit()) {
+    if (!userRecord) {
+      setShowEmailGate(true);
+      return;
+    }
+
+    const { allowed } = canGeneratePlan(userRecord);
+    if (!allowed) {
       setShowPaywall(true);
       return;
     }
@@ -125,16 +157,13 @@ export default function PlannerPage() {
       }
 
       const data = await res.json();
-      console.log('[DateOS] Raw API response:', JSON.stringify(data, null, 2));
-
       if (!data.plan) {
         throw new Error(`API returned no plan. Raw response: ${JSON.stringify(data)}`);
       }
 
       const plan = normalizePlan(data.plan);
-      console.log('[DateOS] Normalized plan:', JSON.stringify(plan, null, 2));
-
-      incrementPlanCount();
+      await incrementPlanCount(userRecord.email);
+      setUserRecord(prev => prev ? { ...prev, plans_generated: prev.plans_generated + 1 } : prev);
       sessionStorage.setItem('dateos_result', JSON.stringify({ plan, formData: form }));
       navigate('/result');
     } catch (err: unknown) {
@@ -146,11 +175,11 @@ export default function PlannerPage() {
 
   return (
     <>
+      {showEmailGate && <EmailGate onAuthenticated={handleEmailAuthenticated} />}
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
       {loading && <LoadingOverlay />}
 
       <div className="min-h-screen" style={{ background: '#0c0c10' }}>
-        {/* Top bar */}
         <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
           <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
             <button
@@ -171,7 +200,6 @@ export default function PlannerPage() {
         </div>
 
         <div className="max-w-2xl mx-auto px-6 py-12">
-          {/* Header */}
           <div className="mb-10">
             <h1 className="font-serif text-4xl md:text-5xl font-medium mb-3" style={{ color: '#f0ede8' }}>
               Plan your date
@@ -182,7 +210,6 @@ export default function PlannerPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* City */}
             <div>
               <label className="label-field">City *</label>
               <input
@@ -194,7 +221,6 @@ export default function PlannerPage() {
               />
             </div>
 
-            {/* Occasion */}
             <div>
               <label className="label-field">Occasion *</label>
               <select
@@ -210,7 +236,6 @@ export default function PlannerPage() {
               </select>
             </div>
 
-            {/* Vibe */}
             <div>
               <label className="label-field">Vibe * <span style={{ color: 'rgba(240,237,232,0.35)', textTransform: 'none', letterSpacing: 'normal', fontSize: '0.7rem' }}>pick up to 2</span></label>
               <div className="flex flex-wrap gap-2 mt-1">
@@ -227,7 +252,6 @@ export default function PlannerPage() {
               </div>
             </div>
 
-            {/* Budget & Day/Time — 2 col */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="label-field">Budget per person *</label>
@@ -260,7 +284,6 @@ export default function PlannerPage() {
               </div>
             </div>
 
-            {/* Optional fields */}
             <div className="space-y-6 pt-2">
               <div style={{ borderTop: '1px solid rgba(240,237,232,0.06)', paddingTop: '1.5rem' }}>
                 <div className="flex items-center gap-2 mb-4">

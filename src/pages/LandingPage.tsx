@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin, Wallet, Sparkles } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
+import EmailGate from '../components/EmailGate';
+import { getStoredEmail } from '../lib/userStore';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showEmailGate, setShowEmailGate] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -56,8 +59,22 @@ export default function LandingPage() {
     };
   }, []);
 
+  function handlePlanClick() {
+    if (getStoredEmail()) {
+      navigate('/plan');
+    } else {
+      setShowEmailGate(true);
+    }
+  }
+
+  function handleEmailAuthenticated() {
+    setShowEmailGate(false);
+    navigate('/plan');
+  }
+
   return (
     <div className="relative min-h-screen flex flex-col overflow-hidden" style={{ background: '#0c0c10' }}>
+      {showEmailGate && <EmailGate onAuthenticated={handleEmailAuthenticated} />}
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
 
       {/* Nav */}
@@ -93,7 +110,7 @@ export default function LandingPage() {
         </p>
 
         <button
-          onClick={() => navigate('/plan')}
+          onClick={handlePlanClick}
           className="btn-rose flex items-center gap-3 text-base mb-14"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
