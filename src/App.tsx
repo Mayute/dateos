@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import PlannerPage from './pages/PlannerPage';
 import ResultPage from './pages/ResultPage';
@@ -7,23 +6,9 @@ import SavedPage from './pages/SavedPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import DisclaimerPage from './pages/DisclaimerPage';
-import { markPaid, markSinglePlan } from './hooks/usePlanGate';
+import SuccessPage from './pages/SuccessPage';
 
 function App() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('paid') === 'true') {
-      if (params.get('plan') === 'single') {
-        markSinglePlan();
-      } else {
-        markPaid();
-      }
-      navigate('/', { replace: true });
-    }
-  }, []);
-
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
@@ -33,6 +18,7 @@ function App() {
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/disclaimer" element={<DisclaimerPage />} />
+      <Route path="/success" element={<SuccessPage />} />
     </Routes>
   );
 }
