@@ -17,7 +17,7 @@ function MapsLink({ address }: { address: string }) {
   const href = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
   return (
     
-      href={href}
+      <a href={href}
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center gap-1.5 transition-colors duration-150"
