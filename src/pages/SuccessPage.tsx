@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
-import { getStoredEmail } from '../lib/userStore';
+import { getStoredEmail, getUserByEmail } from '../lib/userStore';
 
 export default function SuccessPage() {
   const navigate = useNavigate();
@@ -27,9 +27,13 @@ export default function SuccessPage() {
 
         if (!res.ok) throw new Error('Failed to confirm');
 
-        setStatus('success');
+        // Fetch updated user record and store in sessionStorage
+        const updatedUser = await getUserByEmail(appEmail);
+        if (updatedUser) {
+          sessionStorage.setItem('dateos_user', JSON.stringify(updatedUser));
+        }
 
-        // Redirect to planner after 3 seconds
+        setStatus('success');
         setTimeout(() => navigate('/plan'), 3000);
       } catch {
         setStatus('error');
