@@ -16,7 +16,7 @@ function MapsLink({ address }: { address: string }) {
   if (!address) return null;
   const href = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
   return (
-    <a
+    
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -67,26 +67,33 @@ export default function ResultPage() {
   const [backupOpen, setBackupOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [canSave, setCanSave] = useState(false);
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem('dateos_result');
-    console.log('[DateOS] sessionStorage dateos_result:', raw);
     if (!raw) {
       navigate('/plan');
       return;
     }
     try {
       const parsed = JSON.parse(raw);
-      console.log('[DateOS] Parsed result data:', parsed);
       if (!parsed.plan) {
         setParseError(`Stored data is missing 'plan' field. Raw: ${raw}`);
         return;
       }
       setData(parsed);
     } catch (e) {
-      console.error('[DateOS] Failed to parse sessionStorage:', e);
       setParseError(`Failed to parse stored plan: ${e}. Raw: ${raw}`);
+    }
+
+    // Check if user is paid
+    const userStr = sessionStorage.getItem('dateos_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCanSave(user?.is_paid === true);
+      } catch {}
     }
   }, [navigate]);
 
@@ -142,7 +149,7 @@ export default function ResultPage() {
           url: window.location.href,
         });
       } catch {
-        // user cancelled or share failed — do nothing
+        // user cancelled or share failed
       }
     } else {
       copyLink();
@@ -325,20 +332,22 @@ export default function ResultPage() {
 
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <button
-            onClick={handleSave}
-            disabled={saved}
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full font-medium text-sm transition-all duration-200"
-            style={{
-              background: saved ? 'rgba(201,168,76,0.1)' : 'rgba(240,237,232,0.06)',
-              border: saved ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(240,237,232,0.1)',
-              color: saved ? '#c9a84c' : 'rgba(240,237,232,0.7)',
-              fontFamily: 'Outfit, sans-serif',
-            }}
-          >
-            {saved ? <Check size={16} /> : <BookmarkPlus size={16} />}
-            {saved ? 'Saved!' : 'Save This Plan'}
-          </button>
+          {canSave && (
+            <button
+              onClick={handleSave}
+              disabled={saved}
+              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full font-medium text-sm transition-all duration-200"
+              style={{
+                background: saved ? 'rgba(201,168,76,0.1)' : 'rgba(240,237,232,0.06)',
+                border: saved ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(240,237,232,0.1)',
+                color: saved ? '#c9a84c' : 'rgba(240,237,232,0.7)',
+                fontFamily: 'Outfit, sans-serif',
+              }}
+            >
+              {saved ? <Check size={16} /> : <BookmarkPlus size={16} />}
+              {saved ? 'Saved!' : 'Save This Plan'}
+            </button>
+          )}
           <button
             onClick={() => navigate('/plan')}
             className="btn-rose flex-1 flex items-center justify-center gap-2 py-4"

@@ -89,7 +89,7 @@ export default function PaywallModal({ onClose }: Props) {
               </div>
             </div>
             <span className="text-sm font-semibold" style={{ color: '#f0ede8', fontFamily: 'Outfit, sans-serif' }}>
-              {loading === 'single' ? '...' : '$4.99'}
+              {loading === 'single' ? '...' : '$7.99'}
             </span>
           </button>
 
