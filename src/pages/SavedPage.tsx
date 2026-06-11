@@ -29,7 +29,6 @@ export default function SavedPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
-      {/* Top bar */}
       <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
         <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
           <button
@@ -98,32 +97,19 @@ function SavedCard({ plan, expanded, onToggle, onDelete }: {
   const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleShare = async (e: React.MouseEvent) => {
+  const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'DateOS — Date Night Planner',
-          text: 'Check out this date night plan I found on DateOS 🌹',
-          url,
-        });
-      } catch {
-        // user cancelled — do nothing
-      }
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
-        setCopied(true);
-        copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
-      });
-    }
+    navigator.clipboard.writeText(url).then(() => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      setCopied(true);
+      copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
     <div className="rounded-2xl overflow-hidden transition-all duration-300"
       style={{ background: '#13131a', border: `1px solid ${expanded ? 'rgba(232,85,106,0.25)' : 'rgba(240,237,232,0.07)'}` }}>
-      {/* Card header */}
       <div className="px-6 py-5 flex items-center gap-4">
         <button className="flex-1 text-left" onClick={onToggle}>
           <div className="min-w-0">
@@ -171,7 +157,6 @@ function SavedCard({ plan, expanded, onToggle, onDelete }: {
         </div>
       </div>
 
-      {/* Expanded plan detail */}
       {expanded && (
         <div className="animate-fade-in" style={{ borderTop: '1px solid rgba(240,237,232,0.06)' }}>
           <ExpandedPlan plan={plan.plan} />
@@ -186,12 +171,10 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
 
   return (
     <div className="px-6 py-6 space-y-6">
-      {/* Vibe summary */}
       <p className="font-serif text-base italic" style={{ color: 'rgba(240,237,232,0.5)' }}>
         {plan.vibeSummary}
       </p>
 
-      {/* Neighborhood */}
       <div className="px-4 py-4 rounded-xl" style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
         <div className="flex items-center gap-2 mb-2">
           <MapPin size={12} style={{ color: '#e8556a' }} />
@@ -201,7 +184,6 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.5)' }}>{plan.neighborhood.whyThisNeighborhood}</p>
       </div>
 
-      {/* Timeline — full details */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Clock size={12} style={{ color: '#e8556a' }} />
@@ -254,7 +236,6 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
         </div>
       </div>
 
-      {/* Backup option */}
       {plan.backupOption?.venueName && (
         <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
           <button
@@ -284,8 +265,8 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
           )}
         </div>
       )}
-{/* What to Wear */}
-{plan.dressCode && (
+
+      {plan.dressCode && (
         <div className="px-4 py-4 rounded-xl" style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(240,237,232,0.35)' }}>What to Wear</span>
@@ -294,7 +275,6 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
         </div>
       )}
 
-      {/* Date tips */}
       {plan.dateTips && plan.dateTips.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
@@ -312,7 +292,6 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
         </div>
       )}
 
-      {/* Total cost */}
       <div className="flex items-center justify-between px-4 py-3 rounded-xl"
         style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)' }}>
         <span className="text-sm" style={{ color: 'rgba(240,237,232,0.5)' }}>Estimated total per person</span>

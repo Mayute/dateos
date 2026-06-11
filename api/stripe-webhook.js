@@ -39,13 +39,14 @@ export default async function handler(req, res) {
     const tier = TIER_MAP[priceId] ?? 'single';
 
     if (email) {
-      await supabase
+        await supabase
         .from('users')
         .upsert({
           email,
           stripe_customer_id: customerId,
           tier,
           is_paid: true,
+          single_plans_remaining: tier === 'single' ? 1 : 0,
           updated_at: new Date().toISOString()
         }, { onConflict: 'email' });
     }

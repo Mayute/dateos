@@ -38,15 +38,16 @@ export default async function handler(req, res) {
     const tier = TIER_MAP[priceId] ?? 'single';
 
     await supabase
-      .from('users')
-      .update({
-        stripe_customer_id: customerId,
-        stripe_email: stripeEmail,
-        tier,
-        is_paid: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('email', app_email.toLowerCase());
+  .from('users')
+  .update({
+    stripe_customer_id: customerId,
+    stripe_email: stripeEmail,
+    tier,
+    is_paid: true,
+    single_plans_remaining: tier === 'single' ? 1 : 0,
+    updated_at: new Date().toISOString(),
+  })
+  .eq('email', app_email.toLowerCase());
 
     return res.json({ success: true, tier });
   } catch (err) {
