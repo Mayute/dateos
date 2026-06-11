@@ -58,7 +58,8 @@ export async function incrementPlanCount(email: string) {
 }
 
 export function canGeneratePlan(user: UserRecord): { allowed: boolean; reason?: string } {
-  if (user.is_paid) return { allowed: true }
-  if (user.plans_generated < 1) return { allowed: true }
-  return { allowed: false, reason: 'Free limit reached' }
-}
+    if (user.tier === 'pro_monthly' || user.tier === 'pro_annual') return { allowed: true }
+    if (user.tier === 'single' && user.plans_generated < 2) return { allowed: true }
+    if (!user.is_paid && user.plans_generated < 1) return { allowed: true }
+    return { allowed: false, reason: 'Plan limit reached' }
+  }

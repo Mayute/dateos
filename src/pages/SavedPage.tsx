@@ -284,6 +284,15 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
           )}
         </div>
       )}
+{/* What to Wear */}
+{plan.dressCode && (
+        <div className="px-4 py-4 rounded-xl" style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(240,237,232,0.35)' }}>What to Wear</span>
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>{plan.dressCode}</p>
+        </div>
+      )}
 
       {/* Date tips */}
       {plan.dateTips && plan.dateTips.length > 0 && (

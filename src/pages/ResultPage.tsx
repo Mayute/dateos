@@ -332,16 +332,14 @@ export default function ResultPage() {
 
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          {canSave && (
+        {canSave && (
             <button
               onClick={handleSave}
               disabled={saved}
-              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full font-medium text-sm transition-all duration-200"
+              className="btn-rose flex-1 flex items-center justify-center gap-2 py-4"
               style={{
-                background: saved ? 'rgba(201,168,76,0.1)' : 'rgba(240,237,232,0.06)',
-                border: saved ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(240,237,232,0.1)',
-                color: saved ? '#c9a84c' : 'rgba(240,237,232,0.7)',
                 fontFamily: 'Outfit, sans-serif',
+                opacity: saved ? 0.7 : 1,
               }}
             >
               {saved ? <Check size={16} /> : <BookmarkPlus size={16} />}
