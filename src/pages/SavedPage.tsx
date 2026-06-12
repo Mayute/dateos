@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart, Share2, Check, Star } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart, Share2, Check, Star, Shirt } from 'lucide-react';
 import { SavedPlan, DatePlan } from '../types';
 import Footer from '../components/Footer';
 
@@ -99,7 +99,7 @@ function SavedCard({ plan, expanded, onToggle, onDelete }: {
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = window.location.href;
+    const url = 'https://dateos.io';
     navigator.clipboard.writeText(url).then(() => {
       if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
       setCopied(true);
@@ -268,11 +268,12 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
 
       {plan.dressCode && (
         <div className="px-4 py-4 rounded-xl" style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.06)' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(240,237,232,0.35)' }}>What to Wear</span>
-          </div>
-          <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>{plan.dressCode}</p>
+        <div className="flex items-center gap-2 mb-2">
+          <Shirt size={12} style={{ color: '#e8556a' }} />
+          <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(240,237,232,0.35)' }}>What to Wear</span>
         </div>
+        <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.65)' }}>{plan.dressCode}</p>
+      </div>
       )}
 
       {plan.dateTips && plan.dateTips.length > 0 && (

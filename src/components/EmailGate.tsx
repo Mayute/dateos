@@ -41,7 +41,7 @@ export default function EmailGate({ onAuthenticated }: Props) {
           Plan your perfect date
         </h2>
         <p className="text-sm mb-6" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-          Enter your email to get started. Free users get 2 plans.
+          Enter your email to get started. Free users get 1 plan per month. 
         </p>
         <input
           type="email"

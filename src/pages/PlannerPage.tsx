@@ -90,9 +90,14 @@ export default function PlannerPage() {
   useEffect(() => {
     if (userEmail) {
       getUserByEmail(userEmail).then(u => {
-        if (u) setUserRecord(u);
+        if (u) {
+          setUserRecord(u)
+          sessionStorage.setItem('dateos_user', JSON.stringify(u))
+        }
       });
     }
+    // Reset paywall state on mount
+    setShowPaywall(false);
   }, [userEmail]);
 
   function handleEmailAuthenticated(email: string) {
