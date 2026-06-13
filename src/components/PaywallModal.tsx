@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Zap, Star, Crown } from 'lucide-react';
 import { getStoredEmail } from '../lib/userStore';
 
@@ -8,6 +8,10 @@ interface Props {
 
 export default function PaywallModal({ onClose }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(null);
+  }, []);
 
   async function handlePlanSelect(plan: 'single' | 'pro_monthly' | 'pro_annual') {
     setLoading(plan);
@@ -40,7 +44,6 @@ export default function PaywallModal({ onClose }: Props) {
         className="relative w-full max-w-lg rounded-3xl p-8 animate-fade-in"
         style={{ background: '#13131a', border: '1px solid rgba(240,237,232,0.09)', boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}
       >
-        {/* Close */}
         <button
           onClick={onClose}
           className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-150"
@@ -51,7 +54,6 @@ export default function PaywallModal({ onClose }: Props) {
           <X size={15} />
         </button>
 
-        {/* Header */}
         <div className="text-center mb-8">
           <div
             className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-5"
@@ -60,14 +62,13 @@ export default function PaywallModal({ onClose }: Props) {
             <Crown size={24} style={{ color: '#e8556a' }} />
           </div>
           <h2 className="font-serif text-2xl font-medium mb-2" style={{ color: '#f0ede8' }}>
-          You've used your free plan this month
+            You've used your free plan this month
           </h2>
           <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
             Upgrade to keep planning unforgettable dates.
           </p>
         </div>
 
-        {/* Plans */}
         <div className="space-y-3">
           {/* Single Plan */}
           <button
