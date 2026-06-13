@@ -133,7 +133,8 @@ export default function ResultPage() {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
+    const url = `${window.location.href}?utm_source=share&utm_medium=copy&utm_campaign=date_plan`;
+    navigator.clipboard.writeText(url).then(() => {
       if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
       setCopied(true);
       copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
@@ -146,7 +147,7 @@ export default function ResultPage() {
         await navigator.share({
           title: 'DateOS — Date Night Planner',
           text: 'Check out this date night plan I found on DateOS 🌹',
-          url: window.location.href,
+          url: `${window.location.href}?utm_source=share&utm_medium=native&utm_campaign=date_plan`,
         });
       } catch {
         // user cancelled or share failed
