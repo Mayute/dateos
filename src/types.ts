@@ -6,6 +6,7 @@ export interface PlanFormData {
   dayTime: string;
   dietary: string;
   avoid: string;
+  whoIsThisFor: string;
 }
 
 export interface TimelineStop {

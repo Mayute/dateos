@@ -85,6 +85,7 @@ export default function PlannerPage() {
     dayTime: '',
     dietary: '',
     avoid: '',
+    whoIsThisFor: '',
   });
 
   useEffect(() => {
@@ -124,12 +125,13 @@ export default function PlannerPage() {
 - Occasion: ${f.occasion}
 - Vibe: ${f.vibes.join(', ')}
 - Budget per person: ${f.budget}
-- When: ${f.dayTime}${f.dietary ? `\n- Dietary needs: ${f.dietary}` : ''}${f.avoid ? `\n- Avoid: ${f.avoid}` : ''}`;
+- When: ${f.dayTime}
+- Planning for: ${f.whoIsThisFor}${f.dietary ? `\n- Dietary needs: ${f.dietary}` : ''}${f.avoid ? `\n- Avoid: ${f.avoid}` : ''}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.city || !form.occasion || form.vibes.length === 0 || !form.budget || !form.dayTime) {
+    if (!form.city || !form.occasion || form.vibes.length === 0 || !form.budget || !form.dayTime || !form.whoIsThisFor) {
       setError('Please fill in all required fields and select at least one vibe.');
       return;
     }
@@ -292,6 +294,21 @@ if (!allowed) {
             </div>
 
             <div className="space-y-6 pt-2">
+            <div>
+  <label className="label-field">Who's this for? *</label>
+  <div className="flex flex-wrap gap-2 mt-1">
+    {['Just Me', 'My Partner', 'Friends'].map(option => (
+      <button
+        key={option}
+        type="button"
+        onClick={() => setForm(p => ({ ...p, whoIsThisFor: option }))}
+        className={`chip-vibe ${form.whoIsThisFor === option ? 'active' : ''}`}
+      >
+        {option}
+      </button>
+    ))}
+  </div>
+</div>
               <div style={{ borderTop: '1px solid rgba(240,237,232,0.06)', paddingTop: '1.5rem' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-xs font-medium tracking-wider uppercase" style={{ color: 'rgba(240,237,232,0.3)' }}>Optional extras</span>
