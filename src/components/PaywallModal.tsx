@@ -78,7 +78,7 @@ export default function PaywallModal({ onClose }: Props) {
           {/* Single Plan */}
           <button
             onClick={() => handlePlanSelect('single')}
-            disabled={!!loading}
+          
             className="w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-200"
             style={{ background: 'rgba(240,237,232,0.04)', border: '1px solid rgba(240,237,232,0.08)', opacity: loading && loading !== 'single' ? 0.5 : 1 }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(240,237,232,0.18)'; (e.currentTarget as HTMLElement).style.background = 'rgba(240,237,232,0.07)'; }}
@@ -102,7 +102,7 @@ export default function PaywallModal({ onClose }: Props) {
           {/* Pro Monthly */}
           <button
             onClick={() => handlePlanSelect('pro_monthly')}
-            disabled={!!loading}
+            
             className="w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-200"
             style={{ background: 'rgba(232,85,106,0.07)', border: '1px solid rgba(232,85,106,0.22)', opacity: loading && loading !== 'pro_monthly' ? 0.5 : 1 }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(232,85,106,0.12)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,85,106,0.38)'; }}
@@ -126,7 +126,7 @@ export default function PaywallModal({ onClose }: Props) {
           {/* Pro Annual */}
           <button
             onClick={() => handlePlanSelect('pro_annual')}
-            disabled={!!loading}
+            
             className="w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-200 relative overflow-hidden"
             style={{ background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.28)', opacity: loading && loading !== 'pro_annual' ? 0.5 : 1 }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(201,168,76,0.12)'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,168,76,0.45)'; }}
