@@ -11,6 +11,11 @@ export default function PaywallModal({ onClose }: Props) {
 
   useEffect(() => {
     setLoading(null);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') setLoading(null);
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
   async function handlePlanSelect(plan: 'single' | 'pro_monthly' | 'pro_annual') {
