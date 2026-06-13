@@ -60,7 +60,7 @@ export default function PaywallModal({ onClose }: Props) {
             <Crown size={24} style={{ color: '#e8556a' }} />
           </div>
           <h2 className="font-serif text-2xl font-medium mb-2" style={{ color: '#f0ede8' }}>
-            You've used your 2 free plans
+          You've used your free plan this month
           </h2>
           <p className="text-sm" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
             Upgrade to keep planning unforgettable dates.

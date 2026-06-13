@@ -140,11 +140,13 @@ export default function PlannerPage() {
       return;
     }
 
-    const { allowed } = canGeneratePlan(userRecord);
-    if (!allowed) {
-      setShowPaywall(true);
-      return;
-    }
+    const freshUser = await getUserByEmail(userRecord.email);
+if (freshUser) setUserRecord(freshUser);
+const { allowed } = canGeneratePlan(freshUser ?? userRecord);
+if (!allowed) {
+  setShowPaywall(true);
+  return;
+}
 
     setLoading(true);
 
