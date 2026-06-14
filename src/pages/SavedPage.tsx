@@ -207,10 +207,19 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
                 </div>
               </div>
               <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
-                <p className="text-xs pt-3 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
-                  <MapPin size={10} />
-                  {stop.address}
-                </p>
+              {stop.address && (
+                <a
+  
+  href={`https://maps.google.com/?q=${encodeURIComponent(stop.address)}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-xs pt-3 flex items-center gap-1.5"
+  style={{ color: 'rgba(240,237,232,0.85)', textDecoration: 'underline', textDecorationColor: 'rgba(240,237,232,0.3)', textUnderlineOffset: '2px' }}
+>
+  <MapPin size={10} />
+  {stop.address}
+</a>
+)}
                 <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.6)' }}>
                   <span className="font-medium" style={{ color: 'rgba(240,237,232,0.8)' }}>Why here: </span>
                   {stop.whyHere}
@@ -255,11 +264,17 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
                 <p className="text-xs mb-1" style={{ color: 'rgba(240,237,232,0.4)' }}>{plan.backupOption.venueType}</p>
               )}
               {plan.backupOption.address && (
-                <p className="text-xs mb-2 flex items-center gap-1.5" style={{ color: 'rgba(240,237,232,0.85)' }}>
-                  <MapPin size={10} />
-                  {plan.backupOption.address}
-                </p>
-              )}
+  <a
+  href={`https://maps.google.com/?q=${encodeURIComponent(plan.backupOption.address)}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-xs mb-2 flex items-center gap-1.5"
+  style={{ color: 'rgba(240,237,232,0.85)', textDecoration: 'underline', textDecorationColor: 'rgba(240,237,232,0.3)', textUnderlineOffset: '2px' }}
+>
+  <MapPin size={10} />
+  {plan.backupOption.address}
+</a>
+)}
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,237,232,0.6)' }}>{plan.backupOption.whyItWorks}</p>
             </div>
           )}
