@@ -356,7 +356,8 @@ export default function ResultPage() {
             <ArrowRight size={16} />
           </button>
         </div>
-
+{/* Feedback */}
+<FeedbackWidget planTitle={plan.title} />
         {/* Disclaimer */}
         <p className="text-xs leading-relaxed text-center pb-6"
           style={{ color: 'rgba(240,237,232,0.25)', fontFamily: 'Outfit, sans-serif', maxWidth: '520px', margin: '0 auto' }}>
@@ -427,6 +428,97 @@ function TimelineCard({ stop, index }: { stop: import('../types').TimelineStop; 
               <p className="text-sm" style={{ color: '#f0ede8' }}>{stop.bookingTip}</p>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+function FeedbackWidget({ planTitle }: { planTitle: string }) {
+  const [rating, setRating] = useState<'up' | 'down' | null>(null);
+  const [comment, setComment] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    if (!rating) return;
+    setLoading(true);
+    try {
+      const email = localStorage.getItem('dateos_user_email');
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, rating, comment, plan_title: planTitle }),
+      });
+      setSubmitted(true);
+    } catch {
+      // fail silently
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="text-center py-4">
+        <p className="text-sm" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: 'Outfit, sans-serif' }}>
+          Thanks for the feedback 🙏
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-4 text-center">
+      <p className="text-xs mb-3" style={{ color: 'rgba(240,237,232,0.35)', fontFamily: 'Outfit, sans-serif' }}>
+        How was this plan?
+      </p>
+      <div className="flex items-center justify-center gap-3 mb-3">
+        <button
+          onClick={() => setRating('up')}
+          className="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-200"
+          style={{
+            background: rating === 'up' ? 'rgba(232,85,106,0.2)' : 'rgba(240,237,232,0.05)',
+            border: rating === 'up' ? '1px solid rgba(232,85,106,0.4)' : '1px solid rgba(240,237,232,0.1)',
+          }}
+        >
+          👍
+        </button>
+        <button
+          onClick={() => setRating('down')}
+          className="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-200"
+          style={{
+            background: rating === 'down' ? 'rgba(232,85,106,0.2)' : 'rgba(240,237,232,0.05)',
+            border: rating === 'down' ? '1px solid rgba(232,85,106,0.4)' : '1px solid rgba(240,237,232,0.1)',
+          }}
+        >
+          👎
+        </button>
+      </div>
+      {rating && (
+        <div className="max-w-sm mx-auto">
+          <input
+            type="text"
+            placeholder={rating === 'up' ? 'What did you love?' : 'What could be better?'}
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+            className="w-full px-4 py-2 rounded-xl text-sm mb-3"
+            style={{
+              background: 'rgba(240,237,232,0.06)',
+              border: '1px solid rgba(240,237,232,0.1)',
+              color: '#f0ede8',
+              outline: 'none',
+              fontFamily: 'Outfit, sans-serif',
+            }}
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="btn-rose text-sm px-6 py-2"
+            style={{ fontFamily: 'Outfit, sans-serif', opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? 'Sending...' : 'Send'}
+          </button>
         </div>
       )}
     </div>
