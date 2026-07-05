@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     }
 
     const apiData = await response.json();
-    const rawContent = apiData.content?.[0]?.text;
+    const rawContent = apiData.content?.find(block => block.type === 'text')?.text;
 
     if (!rawContent) {
       return res.status(502).json({ error: 'Empty response from AI.' });
