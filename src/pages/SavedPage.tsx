@@ -2,25 +2,37 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart, Share2, Check, Star, Shirt } from 'lucide-react';
 import { SavedPlan, DatePlan } from '../types';
+import { getStoredEmail, getSavedPlans, deleteSavedPlan } from '../lib/userStore';
 import Footer from '../components/Footer';
 
 export default function SavedPage() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<SavedPlan[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const email = getStoredEmail();
 
   useEffect(() => {
-    const raw = localStorage.getItem('dateos_saved');
-    if (raw) {
-      try { setPlans(JSON.parse(raw)); } catch { setPlans([]); }
+    if (!email) {
+      setLoading(false);
+      return;
     }
-  }, []);
+    getSavedPlans(email)
+      .then(setPlans)
+      .catch(e => setLoadError(e?.message || 'Could not load your saved plans.'))
+      .finally(() => setLoading(false));
+  }, [email]);
 
   const deletePlan = (id: string) => {
-    const updated = plans.filter(p => p.id !== id);
-    setPlans(updated);
-    localStorage.setItem('dateos_saved', JSON.stringify(updated));
+    if (!email) return;
+    const previous = plans;
+    setPlans(prev => prev.filter(p => p.id !== id));
     if (expandedId === id) setExpandedId(null);
+    deleteSavedPlan(id, email).catch(() => {
+      setLoadError('Could not delete that plan. Try again.');
+      setPlans(previous);
+    });
   };
 
   const toggleExpand = (id: string) => {
@@ -66,20 +78,37 @@ export default function SavedPage() {
           </p>
         </div>
 
-        {plans.length === 0 ? (
+        {!email ? (
+          <SignedOutState onPlan={() => navigate('/plan')} />
+        ) : loading ? (
+          <p className="text-sm" style={{ color: 'rgba(240,237,232,0.4)', fontFamily: 'Outfit, sans-serif' }}>
+            Loading your saved plans...
+          </p>
+        ) : loadError && plans.length === 0 ? (
+          <p className="text-sm" style={{ color: '#e8556a', fontFamily: 'Outfit, sans-serif' }}>
+            {loadError}
+          </p>
+        ) : plans.length === 0 ? (
           <EmptyState onPlan={() => navigate('/plan')} />
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {plans.map(plan => (
-              <SavedCard
-                key={plan.id}
-                plan={plan}
-                expanded={expandedId === plan.id}
-                onToggle={() => toggleExpand(plan.id)}
-                onDelete={() => deletePlan(plan.id)}
-              />
-            ))}
-          </div>
+          <>
+            {loadError && (
+              <p className="text-sm mb-4" style={{ color: '#e8556a', fontFamily: 'Outfit, sans-serif' }}>
+                {loadError}
+              </p>
+            )}
+            <div className="grid grid-cols-1 gap-4">
+              {plans.map(plan => (
+                <SavedCard
+                  key={plan.id}
+                  plan={plan}
+                  expanded={expandedId === plan.id}
+                  onToggle={() => toggleExpand(plan.id)}
+                  onDelete={() => deletePlan(plan.id)}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
@@ -208,7 +237,7 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
               </div>
               <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid rgba(240,237,232,0.05)' }}>
               {stop.address && (
-                <a
+                <a 
   
   href={`https://maps.google.com/?q=${encodeURIComponent(stop.address)}`}
   target="_blank"
@@ -264,7 +293,7 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
                 <p className="text-xs mb-1" style={{ color: 'rgba(240,237,232,0.4)' }}>{plan.backupOption.venueType}</p>
               )}
               {plan.backupOption.address && (
-  <a
+                 <a 
   href={`https://maps.google.com/?q=${encodeURIComponent(plan.backupOption.address)}`}
   target="_blank"
   rel="noopener noreferrer"
@@ -313,6 +342,29 @@ function ExpandedPlan({ plan }: { plan: DatePlan }) {
         <span className="text-sm" style={{ color: 'rgba(240,237,232,0.5)' }}>Estimated total per person</span>
         <span className="font-serif text-xl font-medium gold-highlight">{plan.totalCostEstimate}</span>
       </div>
+    </div>
+  );
+}
+
+function SignedOutState({ onPlan }: { onPlan: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
+        style={{ background: 'rgba(232,85,106,0.1)', border: '1px solid rgba(232,85,106,0.2)' }}>
+        <BookHeart size={28} style={{ color: '#e8556a' }} />
+      </div>
+      <h3 className="font-serif text-2xl font-medium mb-3" style={{ color: '#f0ede8' }}>Sign in to see your saved plans</h3>
+      <p className="text-sm mb-8 max-w-xs" style={{ color: 'rgba(240,237,232,0.4)', lineHeight: '1.6' }}>
+        Your saved date plans are tied to your verified email.
+      </p>
+      <button
+        onClick={onPlan}
+        className="btn-rose flex items-center gap-2 text-sm"
+        style={{ fontFamily: 'Outfit, sans-serif' }}
+      >
+        Plan a Date Night
+        <ArrowRight size={16} />
+      </button>
     </div>
   );
 }

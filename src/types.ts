@@ -1,6 +1,7 @@
 export interface PlanFormData {
   city: string;
   occasion: string;
+  experienceType: string;
   vibes: string[];
   budget: string;
   dayTime: string;

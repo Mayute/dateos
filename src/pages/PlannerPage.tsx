@@ -68,6 +68,39 @@ const DAYTIMES = [
   { value: 'Sunday Brunch', label: 'Sunday Brunch' },
 ];
 
+const EXPERIENCE_TYPES = [
+  {
+    value: 'Dining & Drinks',
+    label: 'Dining & Drinks',
+    guidance: 'Focus on restaurants, bars, and culinary experiences — a classic dinner-and-drinks flow.',
+  },
+  {
+    value: 'Arts & Culture',
+    label: 'Arts & Culture',
+    guidance: 'Prioritize museums, galleries, theaters, or cultural landmarks alongside food.',
+  },
+  {
+    value: 'Outdoor & Active',
+    label: 'Outdoor & Active',
+    guidance: 'Prioritize outdoor or active experiences — parks, scenic walks, rooftops, or activity-based venues — paired with food.',
+  },
+  {
+    value: 'Live Entertainment',
+    label: 'Live Entertainment',
+    guidance: 'Center the plan around a live entertainment experience — concerts, comedy shows, or live music venues — paired with food.',
+  },
+  {
+    value: 'Hidden Gems',
+    label: 'Hidden Gems',
+    guidance: 'Prioritize under-the-radar, lesser-known local spots over popular or touristy ones — the kind of places locals actually go.',
+  },
+  {
+    value: 'Mix it all',
+    label: 'Mix it all',
+    guidance: 'Blend multiple experience types across the evening — combine dining with something cultural, active, or entertainment-based for variety.',
+  },
+];
+
 export default function PlannerPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -80,6 +113,7 @@ export default function PlannerPage() {
   const [form, setForm] = useState<PlanFormData>({
     city: '',
     occasion: '',
+    experienceType: EXPERIENCE_TYPES[0].value,
     vibes: [],
     budget: '',
     dayTime: '',
@@ -120,9 +154,11 @@ export default function PlannerPage() {
   };
 
   const buildUserPrompt = (f: PlanFormData) => {
+    const experienceType = EXPERIENCE_TYPES.find(e => e.value === f.experienceType) ?? EXPERIENCE_TYPES[0];
     return `Plan a date night with these details:
 - City: ${f.city}
 - Occasion: ${f.occasion}
+- Experience type: ${experienceType.value} — ${experienceType.guidance}
 - Vibe: ${f.vibes.join(', ')}
 - Budget per person: ${f.budget}
 - When: ${f.dayTime}
@@ -243,6 +279,22 @@ if (!allowed) {
                   <option key={o.value} value={o.value} style={{ background: '#13131a' }}>{o.label}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="label-field">Experience Type</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {EXPERIENCE_TYPES.map(et => (
+                  <button
+                    key={et.value}
+                    type="button"
+                    onClick={() => setForm(p => ({ ...p, experienceType: et.value }))}
+                    className={`chip-vibe ${form.experienceType === et.value ? 'active' : ''}`}
+                  >
+                    {et.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>

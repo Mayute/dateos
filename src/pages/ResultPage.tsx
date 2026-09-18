@@ -4,7 +4,8 @@ import {
   ArrowLeft, ArrowRight, Heart, MapPin, Clock, ChevronDown, ChevronUp,
   Share2, BookmarkPlus, Check, Star, Shirt, Link
 } from 'lucide-react';
-import { DatePlan, PlanFormData, SavedPlan } from '../types';
+import { DatePlan, PlanFormData } from '../types';
+import { getStoredEmail, saveDatePlan } from '../lib/userStore';
 import Footer from '../components/Footer';
 
 interface ResultData {
@@ -66,6 +67,8 @@ export default function ResultPage() {
   const [parseError, setParseError] = useState<string | null>(null);
   const [backupOpen, setBackupOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [copied, setCopied] = useState(false);
   const [canSave, setCanSave] = useState(false);
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -117,19 +120,22 @@ export default function ResultPage() {
 
   const { plan, formData } = data;
 
-  const handleSave = () => {
-    const existing: SavedPlan[] = JSON.parse(localStorage.getItem('dateos_saved') || '[]');
-    const newSaved: SavedPlan = {
-      id: Date.now().toString(),
-      title: plan.title,
-      city: formData.city,
-      occasion: formData.occasion,
-      dateSaved: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      plan,
-      formData,
-    };
-    localStorage.setItem('dateos_saved', JSON.stringify([newSaved, ...existing]));
-    setSaved(true);
+  const handleSave = async () => {
+    const email = getStoredEmail();
+    if (!email) {
+      setSaveError('Sign in to save this plan.');
+      return;
+    }
+    setSaving(true);
+    setSaveError('');
+    try {
+      await saveDatePlan(email, plan, formData);
+      setSaved(true);
+    } catch (e: any) {
+      setSaveError(e?.message || 'Could not save this plan. Try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const copyLink = () => {
@@ -334,18 +340,25 @@ export default function ResultPage() {
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
         {canSave && (
-            <button
-              onClick={handleSave}
-              disabled={saved}
-              className="btn-rose flex-1 flex items-center justify-center gap-2 py-4"
-              style={{
-                fontFamily: 'Outfit, sans-serif',
-                opacity: saved ? 0.7 : 1,
-              }}
-            >
-              {saved ? <Check size={16} /> : <BookmarkPlus size={16} />}
-              {saved ? 'Saved!' : 'Save This Plan'}
-            </button>
+            <div className="flex-1 flex flex-col gap-2">
+              <button
+                onClick={handleSave}
+                disabled={saved || saving}
+                className="btn-rose flex-1 flex items-center justify-center gap-2 py-4 w-full"
+                style={{
+                  fontFamily: 'Outfit, sans-serif',
+                  opacity: saved || saving ? 0.7 : 1,
+                }}
+              >
+                {saved ? <Check size={16} /> : <BookmarkPlus size={16} />}
+                {saved ? 'Saved!' : saving ? 'Saving...' : 'Save This Plan'}
+              </button>
+              {saveError && (
+                <p className="text-xs" style={{ color: '#e8556a', fontFamily: 'Outfit, sans-serif' }}>
+                  {saveError}
+                </p>
+              )}
+            </div>
           )}
           <button
             onClick={() => navigate('/plan')}
