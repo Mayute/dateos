@@ -16,7 +16,7 @@ export default function TermsPage() {
         <p>DateOS is an AI-powered date night planning web application. Users enter their city, vibe, budget, and occasion and receive AI-generated date night plans including venue suggestions, timing, dress code suggestions, and insider tips. All plans are generated using artificial intelligence and are intended for inspiration purposes only. We do not guarantee the accuracy, availability, or quality of any recommended venue.</p>
 
         <h2 style={{ fontWeight: 'bold', fontSize: '18px', marginTop: '24px', marginBottom: '8px', color: '#000' }}>3. FREE TIER AND PAID PLANS</h2>
-        <p>Users receive 2 free plans per month. Additional plans require payment via one of our paid tiers: Single Plan ($4.99 one-time), Pro Monthly ($19.99/month), or Pro Annual ($179/year). All payments are processed by Stripe. Subscriptions renew automatically unless cancelled.</p>
+        <p>New users receive 5 free plans with all features. After that, free users may generate 1 itinerary-only plan per month (without What to Wear, Date Tips, or saving). DateOS Premium is available for $7.99/month or $59/year and includes unlimited plans (subject to a fair-use limit), What to Wear, Date Tips, and saved plans. All payments are processed by Stripe. Subscriptions renew automatically unless cancelled.</p>
 
         <h2 style={{ fontWeight: 'bold', fontSize: '18px', marginTop: '24px', marginBottom: '8px', color: '#000' }}>4. CANCELLATIONS AND REFUNDS</h2>
         <p>You may cancel your subscription at any time by contacting us at hello@dateos.io. Refund requests are handled on a case-by-case basis. We reserve the right to approve or deny refund requests at our discretion.</p>

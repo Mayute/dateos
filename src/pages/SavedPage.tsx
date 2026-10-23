@@ -2,8 +2,10 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Trash2, ChevronDown, ChevronUp, Heart, MapPin, Clock, BookHeart, Share2, Check, Star, Shirt } from 'lucide-react';
 import { SavedPlan, DatePlan } from '../types';
-import { getStoredEmail, getSavedPlans, deleteSavedPlan } from '../lib/userStore';
+import { getSavedPlans, deleteSavedPlan } from '../lib/userStore';
+import { useSession } from '../hooks/useSession';
 import Footer from '../components/Footer';
+import SignOutButton from '../components/SignOutButton';
 
 export default function SavedPage() {
   const navigate = useNavigate();
@@ -11,10 +13,12 @@ export default function SavedPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const email = getStoredEmail();
+  const { email, ready } = useSession();
 
   useEffect(() => {
+    if (!ready) return;
     if (!email) {
+      setPlans([]);
       setLoading(false);
       return;
     }
@@ -22,7 +26,7 @@ export default function SavedPage() {
       .then(setPlans)
       .catch(e => setLoadError(e?.message || 'Could not load your saved plans.'))
       .finally(() => setLoading(false));
-  }, [email]);
+    }, [email, ready]);
 
   const deletePlan = (id: string) => {
     if (!email) return;
@@ -54,14 +58,17 @@ export default function SavedPage() {
             Back
           </button>
           <span className="font-serif text-xl font-medium"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
-          <button
-            onClick={() => navigate('/plan')}
-            className="btn-rose flex items-center gap-2 text-sm px-5 py-2.5"
-            style={{ fontFamily: 'Outfit, sans-serif' }}
-          >
-            New Plan
-            <ArrowRight size={14} />
-          </button>
+          <div className="flex items-center gap-2">
+            <SignOutButton />
+            <button
+              onClick={() => navigate('/plan')}
+              className="btn-rose flex items-center gap-2 text-sm px-5 py-2.5"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
+              New Plan
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
 

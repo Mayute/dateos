@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
-import { getStoredEmail, getUserByEmail } from '../lib/userStore';
+import { authedFetch, fetchMe } from '../lib/userStore';
 
 export default function SuccessPage() {
   const navigate = useNavigate();
@@ -11,24 +11,21 @@ export default function SuccessPage() {
     async function confirm() {
       const params = new URLSearchParams(window.location.search);
       const sessionId = params.get('session_id');
-      const appEmail = getStoredEmail();
-
-      if (!sessionId || !appEmail) {
+      if (!sessionId) {
         setStatus('error');
         return;
       }
 
       try {
-        const res = await fetch('/api/confirm-session', {
+        const res = await authedFetch('/api/confirm-session', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId, app_email: appEmail }),
+          body: JSON.stringify({ session_id: sessionId }),
         });
 
         if (!res.ok) throw new Error('Failed to confirm');
 
         // Fetch updated user record and store in sessionStorage
-        const updatedUser = await getUserByEmail(appEmail);
+        const updatedUser = await fetchMe();
         if (updatedUser) {
           sessionStorage.setItem('dateos_user', JSON.stringify(updatedUser));
         }

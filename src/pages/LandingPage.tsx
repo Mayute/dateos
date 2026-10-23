@@ -3,7 +3,8 @@ import { ArrowRight, MapPin, Wallet, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Footer from '../components/Footer';
 import EmailGate from '../components/EmailGate';
-import { getStoredEmail } from '../lib/userStore';
+import SignOutButton from '../components/SignOutButton';
+import { getSessionEmail } from '../lib/userStore';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -59,8 +60,8 @@ export default function LandingPage() {
     };
   }, []);
 
-  function handlePlanClick() {
-    if (getStoredEmail()) {
+  async function handlePlanClick() {
+    if (await getSessionEmail()) {
       navigate('/plan');
     } else {
       setShowEmailGate(true);
@@ -85,15 +86,18 @@ export default function LandingPage() {
           </div>
           <span className="font-serif text-2xl font-medium tracking-wide"><span style={{ color: '#f0ede8' }}>Date</span><span style={{ color: '#e8556a' }}>OS</span></span>
         </div>
-        <button
-          onClick={() => navigate('/saved')}
-          className="text-sm font-medium transition-colors duration-200 px-4 py-2 rounded-full"
-          style={{ color: 'rgba(240,237,232,0.5)', border: '1px solid rgba(240,237,232,0.1)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#f0ede8')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,237,232,0.5)')}
-        >
-          Saved Plans
-        </button>
+        <div className="flex items-center gap-2">
+          <SignOutButton />
+          <button
+            onClick={() => navigate('/saved')}
+            className="text-sm font-medium transition-colors duration-200 px-4 py-2 rounded-full"
+            style={{ color: 'rgba(240,237,232,0.5)', border: '1px solid rgba(240,237,232,0.1)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#f0ede8')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,237,232,0.5)')}
+          >
+            Saved Plans
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}

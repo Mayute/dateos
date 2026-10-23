@@ -1,25 +1,19 @@
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { admin as supabase, getAuthedUser } from './_lib/auth.js';
+import { tierForPrice } from './_lib/stripe-tiers.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
-const TIER_MAP = {
-  'price_1TfJkg4k0yTy8gV1EfCvN0Rl': 'single',
-  'price_1TfJmy4k0yTy8gV1VSfgg0qs': 'pro_monthly',
-  'price_1TfJo64k0yTy8gV1GTAKZg5k': 'pro_annual',
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { session_id, app_email } = req.body;
+  const authed = await getAuthedUser(req);
+  if (!authed) return res.status(401).json({ error: 'Please sign in.' });
 
-  if (!session_id || !app_email) {
-    return res.status(400).json({ error: 'Missing session_id or app_email' });
+  const { session_id } = req.body ?? {};
+  if (!session_id) {
+    return res.status(400).json({ error: 'Missing session_id' });
   }
 
   try {
@@ -31,11 +25,21 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Payment not completed' });
     }
 
+    // The checkout must have been started by this same signed-in account.
+    if (session.metadata?.app_email && session.metadata.app_email !== authed.email) {
+      return res.status(403).json({ error: 'This payment belongs to a different account.' });
+    }
+
     const customer = session.customer;
     const customerId = typeof customer === 'string' ? customer : customer?.id;
     const stripeEmail = typeof customer === 'string' ? null : customer?.email;
     const priceId = session.line_items?.data?.[0]?.price?.id ?? '';
-    const tier = TIER_MAP[priceId] ?? 'single';
+    const tier = tierForPrice(priceId);
+    if (!tier) {
+      // Never guess a tier for a paying customer; surface it instead.
+      console.error('Unknown Stripe price ID in confirm-session:', priceId);
+      return res.status(500).json({ error: 'Unrecognized plan. Please contact support.' });
+    }
 
     await supabase
   .from('users')
@@ -47,7 +51,7 @@ export default async function handler(req, res) {
     single_plans_remaining: tier === 'single' ? 1 : 0,
     updated_at: new Date().toISOString(),
   })
-  .eq('email', app_email.toLowerCase());
+  .eq('email', authed.email);
 
     return res.json({ success: true, tier });
   } catch (err) {

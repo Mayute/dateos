@@ -1,17 +1,9 @@
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { admin as supabase } from './_lib/auth.js';
+import { tierForPrice } from './_lib/stripe-tiers.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
-const TIER_MAP = {
-    'price_1TfJkg4k0yTy8gV1EfCvN0Rl': 'single',
-    'price_1TfJmy4k0yTy8gV1VSfgg0qs': 'pro_monthly',
-    'price_1TfJo64k0yTy8gV1GTAKZg5k': 'pro_annual',
-  }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -32,11 +24,19 @@ export default async function handler(req, res) {
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const email = session.customer_details?.email?.toLowerCase();
+    const eventSession = event.data.object;
+    // The webhook payload does not include line items, so fetch them. Without this
+    // every purchase fell back to 'single' and could overwrite a correct Pro tier.
+    const session = await stripe.checkout.sessions.retrieve(eventSession.id, { expand: ['line_items'] });
+    const email = (session.metadata?.app_email || session.customer_details?.email)?.toLowerCase();
     const customerId = session.customer;
     const priceId = session.line_items?.data?.[0]?.price?.id ?? '';
-    const tier = TIER_MAP[priceId] ?? 'single';
+    const tier = tierForPrice(priceId);
+    if (!tier) {
+      // Return an error so Stripe shows the failure and retries, instead of guessing a tier.
+      console.error('Unknown Stripe price ID in webhook:', priceId);
+      return res.status(500).json({ error: 'Unknown price' });
+    }
 
     if (email) {
         await supabase

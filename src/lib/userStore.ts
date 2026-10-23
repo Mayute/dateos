@@ -10,133 +10,116 @@ export type UserRecord = {
   stripe_customer_id: string | null
   tier: 'free' | 'single' | 'pro_monthly' | 'pro_annual'
   plans_generated: number
+  trial_plans_used: number
+  monthly_plans_used: number
   is_paid: boolean
   free_plans_reset_month: string | null
   single_plans_remaining: number
 }
 
-const SESSION_KEY = 'dateos_user_email'
-const NAME_KEY = 'dateos_user_name'
+/**
+ * Identity now comes from the Supabase session (set by verifyOtp), not from localStorage.
+ * These helpers are kept only so stale values from the old flow can be cleaned up.
+ */
+const LEGACY_EMAIL_KEY = 'dateos_user_email'
+const LEGACY_NAME_KEY = 'dateos_user_name'
 
-export function getStoredEmail(): string | null {
-  return localStorage.getItem(SESSION_KEY)
-}
-
-export function setStoredEmail(email: string) {
-  localStorage.setItem(SESSION_KEY, email)
-}
-
-export function getStoredName(): string | null {
-  return localStorage.getItem(NAME_KEY)
-}
-
-export function setStoredName(name: string) {
-  localStorage.setItem(NAME_KEY, name)
+export function clearLocalIdentity() {
+  try {
+    localStorage.removeItem(LEGACY_EMAIL_KEY)
+    localStorage.removeItem(LEGACY_NAME_KEY)
+    sessionStorage.removeItem('dateos_user')
+    sessionStorage.removeItem('dateos_result')
+  } catch {
+    // storage can be unavailable (private mode) - nothing to clean up then
+  }
 }
 
 function currentMonthKey(): string {
   const d = new Date()
-  return `${d.getFullYear()}-${d.getMonth() + 1}`
+  return `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}`
+}
+
+export async function getAccessToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? null
+}
+
+/** fetch() that attaches the signed-in user's Supabase token. */
+export async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const token = await getAccessToken()
+  const headers = new Headers(init.headers)
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  return fetch(path, { ...init, headers })
+}
+
+/** Email of the verified session, or null when signed out. */
+export async function getSessionEmail(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  return data.session?.user?.email?.toLowerCase() ?? null
 }
 
 /**
- * Creates or fetches a user row AFTER OTP verification has already succeeded.
- * This should only ever be called post-verifyOtp — never from a raw email input —
- * otherwise the fake-email gap this was built to close reopens.
+ * Loads (and on first call creates) the signed-in user's row via the server.
+ * Pass `name` right after OTP verification so it is stored on first sign-up.
+ * Returns null when there is no valid session.
  */
-export async function getOrCreateVerifiedUser(email: string, name: string): Promise<UserRecord> {
-  const normalizedEmail = email.toLowerCase()
-
-  const { data: existing } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', normalizedEmail)
-    .single()
-
-  if (existing) {
-    // Backfill name / verification status if this row predates the OTP flow
-    if (!existing.name || !existing.email_verified) {
-      const { data: updated } = await supabase
-        .from('users')
-        .update({ name: existing.name || name, email_verified: true })
-        .eq('email', normalizedEmail)
-        .select()
-        .single()
-      return updated || existing
-    }
-    return existing
-  }
-
-  const { data: created, error } = await supabase
-    .from('users')
-    .insert({ email: normalizedEmail, name, email_verified: true })
-    .select()
-    .single()
-
-  if (error) throw new Error('Failed to create user: ' + error.message)
-  return created
+export async function fetchMe(name?: string): Promise<UserRecord | null> {
+  const res = await authedFetch('/api/me', {
+    method: 'POST',
+    body: JSON.stringify({ name: name ?? '' }),
+  })
+  if (res.status === 401) return null
+  if (!res.ok) throw new Error('Could not load your account.')
+  const data = await res.json()
+  return data.user as UserRecord
 }
 
-export async function getUserByEmail(email: string): Promise<UserRecord | null> {
-  const { data } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email.toLowerCase())
-    .single()
-  return data
+export async function signOut() {
+  await supabase.auth.signOut()
+  clearLocalIdentity()
 }
 
-export async function incrementPlanCount(email: string) {
-  const user = await getUserByEmail(email)
-  if (!user) return
+export const TRIAL_PLANS = 5
+export const FREE_MONTHLY_PLANS = 1
 
-  const monthKey = currentMonthKey()
+export type PlanAccess = 'full' | 'limited'
 
-  if (user.tier === 'free' || !user.is_paid) {
-    // Reset monthly counter if new month
-    const resetMonth = user.free_plans_reset_month
-    const newCount = resetMonth === monthKey ? user.plans_generated + 1 : 1
-    await supabase
-      .from('users')
-      .update({
-        plans_generated: newCount,
-        free_plans_reset_month: monthKey,
-      })
-      .eq('email', email.toLowerCase())
-  } else if (user.tier === 'single') {
-    // Decrement single plans remaining
-    await supabase
-      .from('users')
-      .update({
-        plans_generated: user.plans_generated + 1,
-        single_plans_remaining: Math.max(0, user.single_plans_remaining - 1),
-      })
-      .eq('email', email.toLowerCase())
-  } else {
-    // Pro — just increment
-    await supabase
-      .from('users')
-      .update({ plans_generated: user.plans_generated + 1 })
-      .eq('email', email.toLowerCase())
-  }
+export type Usage = {
+  isPremium: boolean
+  trialUsed: number
+  trialLeft: number
+  /** Can the user start a plan right now? (The server makes the final call.) */
+  canGenerate: boolean
+  /** Access level the NEXT plan would have. */
+  nextAccess: PlanAccess
 }
 
-export function canGeneratePlan(user: UserRecord): { allowed: boolean; reason?: string } {
-  // Pro — unlimited
-  if (user.tier === 'pro_monthly' || user.tier === 'pro_annual') return { allowed: true }
+/** Friendly client-side read of the user's quota. The server enforces the real limits. */
+export function getUsage(user: UserRecord): Usage {
+  const isPremium = user.tier === 'pro_monthly' || user.tier === 'pro_annual'
+  const trialUsed = Math.min(user.trial_plans_used ?? 0, TRIAL_PLANS)
+  const trialLeft = TRIAL_PLANS - trialUsed
 
-  // Single plan — check remaining
-  if (user.tier === 'single') {
-    if (user.single_plans_remaining > 0) return { allowed: true }
-    return { allowed: false, reason: 'Single plan used' }
+  if (isPremium) return { isPremium, trialUsed, trialLeft, canGenerate: true, nextAccess: 'full' }
+
+  // Legacy one-time "single" purchase
+  if (user.tier === 'single' && user.single_plans_remaining > 0) {
+    return { isPremium: false, trialUsed, trialLeft, canGenerate: true, nextAccess: 'full' }
   }
 
-  // Free — 1 plan per month
-  const monthKey = currentMonthKey()
-  const isNewMonth = user.free_plans_reset_month !== monthKey
-  if (isNewMonth || user.plans_generated < 1) return { allowed: true }
+  if (trialLeft > 0) return { isPremium: false, trialUsed, trialLeft, canGenerate: true, nextAccess: 'full' }
 
-  return { allowed: false, reason: 'Free plan used this month' }
+  const sameMonth = user.free_plans_reset_month === currentMonthKey()
+  const monthlyUsed = sameMonth ? (user.monthly_plans_used ?? 0) : 0
+  return {
+    isPremium: false,
+    trialUsed,
+    trialLeft: 0,
+    canGenerate: monthlyUsed < FREE_MONTHLY_PLANS,
+    nextAccess: 'limited',
+  }
 }
 
 type SavedPlanRow = {

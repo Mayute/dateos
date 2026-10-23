@@ -2,15 +2,60 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, Heart, MapPin, Clock, ChevronDown, ChevronUp,
-  Share2, BookmarkPlus, Check, Star, Shirt, Link
+  Share2, BookmarkPlus, Check, Star, Shirt, Link, Lock
 } from 'lucide-react';
 import { DatePlan, PlanFormData } from '../types';
-import { getStoredEmail, saveDatePlan } from '../lib/userStore';
+import { authedFetch, getSessionEmail, saveDatePlan, TRIAL_PLANS } from '../lib/userStore';
+import PaywallModal from '../components/PaywallModal';
 import Footer from '../components/Footer';
 
 interface ResultData {
   plan: DatePlan;
   formData: PlanFormData;
+  /** 'limited' = itinerary-only plan (no What to Wear / Date Tips / saving). Missing = full. */
+  access?: 'full' | 'limited';
+  quota?: { isPremium: boolean; trialUsed: number; trialLeft: number } | null;
+}
+
+function LockedCard({ title, blurb, onUnlock }: { title: string; blurb: string; onUnlock: () => void }) {
+  return (
+    <div className="rounded-2xl p-6 relative overflow-hidden"
+      style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.08)' }}>
+      <div className="flex items-center gap-2 mb-4">
+        <Lock size={13} style={{ color: '#c9a84c' }} />
+        <span className="text-xs font-medium tracking-widest uppercase" style={{ color: 'rgba(240,237,232,0.4)' }}>{title}</span>
+        <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
+          style={{ background: 'rgba(201,168,76,0.15)', color: '#c9a84c', fontFamily: 'Outfit, sans-serif' }}>Premium</span>
+      </div>
+      <div className="space-y-2 mb-5 select-none" aria-hidden="true" style={{ filter: 'blur(5px)', opacity: 0.45 }}>
+        <div className="h-3 rounded" style={{ background: 'rgba(240,237,232,0.5)', width: '95%' }} />
+        <div className="h-3 rounded" style={{ background: 'rgba(240,237,232,0.5)', width: '88%' }} />
+        <div className="h-3 rounded" style={{ background: 'rgba(240,237,232,0.5)', width: '62%' }} />
+      </div>
+      <p className="text-sm mb-4" style={{ color: 'rgba(240,237,232,0.55)', fontFamily: 'Outfit, sans-serif' }}>{blurb}</p>
+      <button onClick={onUnlock} className="btn-rose text-sm px-5 py-2.5" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        Unlock with Premium
+      </button>
+    </div>
+  );
+}
+
+function UsageBanner({ quota, access }: { quota?: ResultData['quota']; access?: 'full' | 'limited' }) {
+  if (!quota || quota.isPremium) return null;
+  let text: string;
+  if (access === 'limited') {
+    text = "This is your free itinerary-only plan for the month. Go Premium for What to Wear, Date Tips and unlimited plans.";
+  } else if (quota.trialLeft > 0) {
+    text = `Free plan ${quota.trialUsed} of ${TRIAL_PLANS} used · ${quota.trialLeft} left`;
+  } else {
+    text = "That was your last full plan. After this you get 1 itinerary-only plan a month, or go Premium for unlimited.";
+  }
+  return (
+    <div className="mb-6 px-4 py-3 rounded-xl text-center text-xs"
+      style={{ background: 'rgba(232,85,106,0.08)', border: '1px solid rgba(232,85,106,0.2)', color: 'rgba(240,237,232,0.7)', fontFamily: 'Outfit, sans-serif' }}>
+      {text}
+    </div>
+  );
 }
 
 function MapsLink({ address }: { address: string }) {
@@ -70,7 +115,7 @@ export default function ResultPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [canSave, setCanSave] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -90,14 +135,6 @@ export default function ResultPage() {
       setParseError(`Failed to parse stored plan: ${e}. Raw: ${raw}`);
     }
 
-    // Check if user is paid
-    const userStr = sessionStorage.getItem('dateos_user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        setCanSave(user?.is_paid === true);
-      } catch {}
-    }
   }, [navigate]);
 
   if (parseError) {
@@ -119,9 +156,11 @@ export default function ResultPage() {
   if (!data) return null;
 
   const { plan, formData } = data;
+  const isLimited = data.access === 'limited';
+  const canSave = !isLimited;
 
   const handleSave = async () => {
-    const email = getStoredEmail();
+    const email = await getSessionEmail();
     if (!email) {
       setSaveError('Sign in to save this plan.');
       return;
@@ -168,6 +207,13 @@ export default function ResultPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0c0c10' }}>
+      {showPaywall && (
+        <PaywallModal
+          onClose={() => setShowPaywall(false)}
+          title="Unlock the full DateOS"
+          subtitle="What to Wear, Date Tips, saved plans and unlimited plans."
+        />
+      )}
       {/* Top bar */}
       <div className="sticky top-0 z-40" style={{ background: 'rgba(12,12,16,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(240,237,232,0.06)' }}>
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -215,6 +261,8 @@ export default function ResultPage() {
       </div>
 
       <div className="flex-1 max-w-3xl mx-auto px-6 py-12 space-y-6 animate-fade-in w-full">
+
+        <UsageBanner quota={data.quota} access={data.access} />
 
         {/* Hero header */}
         <div className="text-center mb-10">
@@ -292,6 +340,13 @@ export default function ResultPage() {
         </SectionCard>
 
         {/* Date tips */}
+        {isLimited ? (
+          <LockedCard
+            title="Date Tips"
+            blurb="Insider tips to make this date go smoothly."
+            onUnlock={() => setShowPaywall(true)}
+          />
+        ) : (
         <SectionCard>
           <div className="flex items-center gap-2 mb-4">
             <Heart size={13} fill="#e8556a" style={{ color: '#e8556a' }} />
@@ -309,9 +364,17 @@ export default function ResultPage() {
             ))}
           </div>
         </SectionCard>
+        )}
 
         {/* What to Wear */}
-        {plan.dressCode && (
+        {isLimited && (
+          <LockedCard
+            title="What to Wear"
+            blurb="Outfit guidance matched to your venues and the vibe of the night."
+            onUnlock={() => setShowPaywall(true)}
+          />
+        )}
+        {!isLimited && plan.dressCode && (
           <SectionCard>
             <div className="flex items-center gap-2 mb-4">
               <Shirt size={13} style={{ color: '#e8556a' }} />
@@ -456,11 +519,9 @@ function FeedbackWidget({ planTitle }: { planTitle: string }) {
     if (!rating) return;
     setLoading(true);
     try {
-      const email = localStorage.getItem('dateos_user_email');
-      await fetch('/api/feedback', {
+      await authedFetch('/api/feedback', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, rating, comment, plan_title: planTitle }),
+        body: JSON.stringify({ rating, comment, plan_title: planTitle }),
       });
       setSubmitted(true);
     } catch {

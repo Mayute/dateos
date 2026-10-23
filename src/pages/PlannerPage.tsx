@@ -6,10 +6,10 @@ import Logo from '../components/logo';
 import PaywallModal from '../components/PaywallModal';
 import EmailGate from '../components/EmailGate';
 import {
-  getStoredEmail,
-  getUserByEmail,
-  incrementPlanCount,
-  canGeneratePlan,
+  authedFetch,
+  fetchMe,
+  getUsage,
+  TRIAL_PLANS,
   type UserRecord
 } from '../lib/userStore';
 
@@ -106,9 +106,9 @@ export default function PlannerPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(getStoredEmail());
   const [userRecord, setUserRecord] = useState<UserRecord | null>(null);
-  const [showEmailGate, setShowEmailGate] = useState(!getStoredEmail());
+  const [showEmailGate, setShowEmailGate] = useState(false);
+  const usage = userRecord ? getUsage(userRecord) : null;
 
   const [form, setForm] = useState<PlanFormData>({
     city: '',
@@ -122,25 +122,27 @@ export default function PlannerPage() {
     whoIsThisFor: '',
   });
 
+  // Ask the server who we are. No valid session (or an old localStorage-only login) -> show the gate.
   useEffect(() => {
-    if (userEmail) {
-      getUserByEmail(userEmail).then(u => {
+    let active = true;
+    fetchMe()
+      .then(u => {
+        if (!active) return;
         if (u) {
-          setUserRecord(u)
-          sessionStorage.setItem('dateos_user', JSON.stringify(u))
+          setUserRecord(u);
+          setShowEmailGate(false);
+        } else {
+          setShowEmailGate(true);
         }
-      });
-    }
-    // Reset paywall state on mount
+      })
+      .catch(() => { if (active) setShowEmailGate(true); });
     setShowPaywall(false);
-  }, [userEmail]);
+    return () => { active = false; };
+  }, []);
 
-  function handleEmailAuthenticated(email: string) {
-    setUserEmail(email);
+  function handleEmailAuthenticated() {
     setShowEmailGate(false);
-    getUserByEmail(email).then(u => {
-      if (u) setUserRecord(u);
-    });
+    fetchMe().then(u => { if (u) setUserRecord(u); });
   }
 
   const toggleVibe = (vibe: string) => {
@@ -178,26 +180,37 @@ export default function PlannerPage() {
       return;
     }
 
-    const freshUser = await getUserByEmail(userRecord.email);
-if (freshUser) setUserRecord(freshUser);
-const { allowed } = canGeneratePlan(freshUser ?? userRecord);
-if (!allowed) {
-  setShowPaywall(true);
-  return;
-}
+    // Friendly pre-check using a fresh copy from the server. The server enforces the limit for real.
+    const freshUser = await fetchMe().catch(() => null);
+    if (!freshUser) {
+      setShowEmailGate(true);
+      return;
+    }
+    setUserRecord(freshUser);
+    if (!getUsage(freshUser).canGenerate) {
+      setShowPaywall(true);
+      return;
+    }
 
     setLoading(true);
 
     try {
       const userPrompt = buildUserPrompt(form);
-      const res = await fetch('/api/plan', {
+      const res = await authedFetch('/api/plan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userPrompt }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 402 || data.code === 'LIMIT') {
+          setShowPaywall(true);
+          return;
+        }
+        if (res.status === 401 || data.code === 'AUTH') {
+          setShowEmailGate(true);
+          return;
+        }
         throw new Error(data.error || 'Something went wrong. Please try again.');
       }
 
@@ -207,9 +220,14 @@ if (!allowed) {
       }
 
       const plan = normalizePlan(data.plan);
-      await incrementPlanCount(userRecord.email);
-      setUserRecord(prev => prev ? { ...prev, plans_generated: prev.plans_generated + 1 } : prev);
-      sessionStorage.setItem('dateos_result', JSON.stringify({ plan, formData: form }));
+      if (data.user) setUserRecord(data.user as UserRecord);
+      const after = data.user ? getUsage(data.user as UserRecord) : null;
+      sessionStorage.setItem('dateos_result', JSON.stringify({
+        plan,
+        formData: form,
+        access: data.access === 'limited' ? 'limited' : 'full',
+        quota: after ? { isPremium: after.isPremium, trialUsed: after.trialUsed, trialLeft: after.trialLeft } : null,
+      }));
       navigate('/result');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
@@ -221,7 +239,7 @@ if (!allowed) {
   return (
     <>
       {showEmailGate && <EmailGate onAuthenticated={handleEmailAuthenticated} />}
-      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
+      {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} title="You've used this month's free plan" subtitle="Go Premium for unlimited plans, What to Wear, Date Tips and saved plans." />}
       {loading && <LoadingOverlay />}
 
       <div className="min-h-screen" style={{ background: '#0c0c10' }}>
@@ -395,6 +413,19 @@ if (!allowed) {
               <div className="px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(232,85,106,0.1)', border: '1px solid rgba(232,85,106,0.3)', color: '#e8556a' }}>
                 {error}
               </div>
+            )}
+
+            {usage && !usage.isPremium && (
+              <p className="text-center text-sm" style={{ color: 'rgba(240,237,232,0.5)', fontFamily: 'Outfit, sans-serif' }}>
+                {usage.trialLeft > 0
+                  ? <>
+                      <span style={{ color: '#e8556a', fontWeight: 600 }}>{usage.trialLeft} of {TRIAL_PLANS}</span> free plans left
+                      {' '}· every feature included
+                    </>
+                  : usage.canGenerate
+                    ? 'Your 1 free itinerary-only plan this month is ready'
+                    : "You've used this month's free plan"}
+              </p>
             )}
 
             <button

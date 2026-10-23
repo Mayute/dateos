@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { getOrCreateVerifiedUser, setStoredEmail, setStoredName } from '../lib/userStore'
+import { fetchMe } from '../lib/userStore'
 
 type Props = {
   onAuthenticated: (email: string) => void
@@ -100,10 +100,10 @@ export default function EmailGate({ onAuthenticated }: Props) {
       })
       if (verifyError) throw verifyError
 
-      // Only reachable after a verified OTP — this is what closes the fake-email gap.
-      await getOrCreateVerifiedUser(email, name.trim())
-      setStoredEmail(email)
-      setStoredName(name.trim())
+            // Only reachable after a verified OTP. The server verifies the new session token
+      // and creates/loads the user row, so the email can't be spoofed from the browser.
+      const me = await fetchMe(name.trim())
+      if (!me) throw new Error('Could not start your session. Please try again.')
       onAuthenticated(email)
     } catch (e: any) {
       setError(e?.message === 'Token has expired or is invalid'
@@ -129,7 +129,7 @@ export default function EmailGate({ onAuthenticated }: Props) {
               Plan your perfect date
             </h2>
             <p className="text-sm mb-6" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-              We'll text a 6-digit code to your email. Free users get 1 plan per month.
+            We'll email a 6-digit code to your address. Your first 5 plans are free, with every feature.
             </p>
             <input
               type="text"
