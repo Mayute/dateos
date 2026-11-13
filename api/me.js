@@ -1,4 +1,5 @@
 import { admin, getAuthedUser } from './_lib/auth.js';
+import { canonicalEmail, isDisposableEmail, siblingUsage, withGroupUsage } from './_lib/aliases.js';
 
 // GET  /api/me            -> returns the signed-in user's row (creates it on first call)
 // POST /api/me {name}     -> same, and stores the name if the row has none
@@ -9,6 +10,9 @@ export default async function handler(req, res) {
   if (!authed) return res.status(401).json({ error: 'Please sign in.' });
 
   const name = typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 80) : '';
+
+  // Counters shown to the client include other aliases of the same inbox.
+  const shared = async (row) => withGroupUsage(row, await siblingUsage(admin, row));
 
   try {
     const { data: existing, error: readErr } = await admin
@@ -22,7 +26,8 @@ export default async function handler(req, res) {
       const patch = {};
       if (!existing.email_verified) patch.email_verified = true;
       if (!existing.name && name) patch.name = name;
-      if (Object.keys(patch).length === 0) return res.json({ user: existing });
+      if (!existing.canonical_email) patch.canonical_email = canonicalEmail(authed.email);
+      if (Object.keys(patch).length === 0) return res.json({ user: await shared(existing) });
 
       const { data: updated, error: updErr } = await admin
         .from('users')
@@ -31,16 +36,28 @@ export default async function handler(req, res) {
         .select()
         .single();
       if (updErr) throw updErr;
-      return res.json({ user: updated });
+      return res.json({ user: await shared(updated) });
+    }
+
+    if (isDisposableEmail(authed.email)) {
+      return res.status(403).json({
+        error: 'Please sign in with a permanent email address, not a temporary inbox.',
+        code: 'EMAIL_NOT_ALLOWED',
+      });
     }
 
     const { data: created, error: insErr } = await admin
       .from('users')
-      .insert({ email: authed.email, name: name || null, email_verified: true })
+      .insert({
+        email: authed.email,
+        canonical_email: canonicalEmail(authed.email),
+        name: name || null,
+        email_verified: true,
+      })
       .select()
       .single();
     if (insErr) throw insErr;
-    return res.json({ user: created });
+    return res.json({ user: await shared(created) });
   } catch (err) {
     console.error('/api/me error:', err);
     return res.status(500).json({ error: 'Could not load your account.' });

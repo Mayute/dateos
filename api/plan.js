@@ -1,5 +1,6 @@
 import { admin, getAuthedUser } from './_lib/auth.js';
 import { evaluateUsage, stripPremiumFields } from './_lib/limits.js';
+import { siblingUsage, withGroupUsage } from './_lib/aliases.js';
 
 const MAX_PROMPT_CHARS = 3000;
 
@@ -59,7 +60,8 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Account not found. Please sign in again.', code: 'AUTH' });
     }
 
-    const usage = evaluateUsage(user);
+    const siblings = await siblingUsage(admin, user);
+    const usage = evaluateUsage(user, siblings);
     if (!usage.allowed) {
       if (usage.reason === 'FAIR_USE') {
         return res.status(429).json({ error: "You've reached this month's fair-use limit. It resets next month.", code: 'FAIR_USE' });
@@ -128,7 +130,7 @@ export default async function handler(req, res) {
 
     // Free users on an itinerary-only plan never receive What to Wear or Date Tips.
     const finalPlan = reserved.access === 'limited' ? stripPremiumFields(plan) : plan;
-    return res.json({ plan: finalPlan, access: reserved.access, user: reserved.after });
+    return res.json({ plan: finalPlan, access: reserved.access, user: withGroupUsage(reserved.after, siblings) });
   } catch (err) {
     console.error('Server error:', err);
     await refund(reserved);

@@ -71,8 +71,8 @@ export async function fetchMe(name?: string): Promise<UserRecord | null> {
     body: JSON.stringify({ name: name ?? '' }),
   })
   if (res.status === 401) return null
-  if (!res.ok) throw new Error('Could not load your account.')
-  const data = await res.json()
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.error || 'Could not load your account.')
   return data.user as UserRecord
 }
 

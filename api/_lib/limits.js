@@ -26,10 +26,14 @@ export function isPremiumTier(tier) {
  *   { allowed: false, reason: 'LIMIT' | 'FAIR_USE' }
  *   { allowed: true, access: 'full' | 'limited', patch }   // patch = columns to write to spend the plan
  */
-export function evaluateUsage(user) {
+export function evaluateUsage(user, siblings = { trial: 0, monthly: 0 }) {
   const monthKey = currentMonthKey();
   const sameMonth = user.free_plans_reset_month === monthKey;
   const monthlyUsed = sameMonth ? (user.monthly_plans_used ?? 0) : 0;
+  // Free limits are shared by every alias of the same inbox (see aliases.js).
+  // The checks use the group total; the patch only ever writes this account's own counters.
+  const groupTrial = (user.trial_plans_used ?? 0) + siblings.trial;
+  const groupMonthly = monthlyUsed + siblings.monthly;
   const lifetime = (user.plans_generated ?? 0) + 1;
 
   // Premium
@@ -59,7 +63,7 @@ export function evaluateUsage(user) {
   }
 
   // Free: trial first
-  if ((user.trial_plans_used ?? 0) < TRIAL_PLANS) {
+  if (groupTrial < TRIAL_PLANS) {
     return {
       allowed: true,
       access: 'full',
@@ -71,7 +75,7 @@ export function evaluateUsage(user) {
   }
 
   // Free: after the trial, 1 itinerary-only plan a month
-  if (monthlyUsed < FREE_MONTHLY_PLANS) {
+  if (groupMonthly < FREE_MONTHLY_PLANS) {
     return {
       allowed: true,
       access: 'limited',
