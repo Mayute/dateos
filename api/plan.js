@@ -1,6 +1,7 @@
 import { admin, getAuthedUser } from './_lib/auth.js';
 import { evaluateUsage, stripPremiumFields } from './_lib/limits.js';
 import { siblingUsage, withGroupUsage } from './_lib/aliases.js';
+import { logPlanEvent } from './_lib/events.js';
 
 const MAX_PROMPT_CHARS = 3000;
 
@@ -130,6 +131,7 @@ export default async function handler(req, res) {
 
     // Free users on an itinerary-only plan never receive What to Wear or Date Tips.
     const finalPlan = reserved.access === 'limited' ? stripPremiumFields(plan) : plan;
+    await logPlanEvent(admin, { user: reserved.before, userPrompt, access: reserved.access, status: 'ok' });
     return res.json({ plan: finalPlan, access: reserved.access, user: withGroupUsage(reserved.after, siblings) });
   } catch (err) {
     console.error('Server error:', err);
