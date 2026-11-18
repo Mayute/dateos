@@ -129,7 +129,7 @@ export default function EmailGate({ onAuthenticated }: Props) {
               Plan your perfect date
             </h2>
             <p className="text-sm mb-6" style={{ color: 'rgba(240,237,232,0.45)', fontFamily: 'Outfit, sans-serif' }}>
-            We'll email a 6-digit code to your address. Your first 5 plans are free, with every feature.
+            We'll email a 6-digit code to your address. Your first 5 plans are free, with every feature. No card needed.
             </p>
             <input
               type="text"
