@@ -66,9 +66,11 @@ export async function getSessionEmail(): Promise<string | null> {
  * Returns null when there is no valid session.
  */
 export async function fetchMe(name?: string): Promise<UserRecord | null> {
+  let ref = ''
+  try { ref = localStorage.getItem('dateos_ref') || '' } catch { /* storage unavailable */ }
   const res = await authedFetch('/api/me', {
     method: 'POST',
-    body: JSON.stringify({ name: name ?? '' }),
+    body: JSON.stringify({ name: name ?? '', ref }),
   })
   if (res.status === 401) return null
   const data = await res.json().catch(() => ({}))

@@ -10,6 +10,9 @@ export default async function handler(req, res) {
   if (!authed) return res.status(401).json({ error: 'Please sign in.' });
 
   const name = typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 80) : '';
+    // Which creator link brought this person (only used when the account is first created).
+    const refRaw = typeof req.body?.ref === 'string' ? req.body.ref.trim() : '';
+    const referral = /^[a-z0-9_.-]{1,50}$/i.test(refRaw) ? refRaw.toLowerCase() : null;
 
   // Counters shown to the client include other aliases of the same inbox.
   const shared = async (row) => withGroupUsage(row, await siblingUsage(admin, row));
@@ -51,6 +54,7 @@ export default async function handler(req, res) {
       .insert({
         email: authed.email,
         canonical_email: canonicalEmail(authed.email),
+        referral,
         name: name || null,
         email_verified: true,
       })
